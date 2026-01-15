@@ -13,8 +13,8 @@
 
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
-            color: #fff;
+            background: #161512;
+            color: #bababa;
             padding: 20px;
             min-height: 100vh;
         }
@@ -33,12 +33,14 @@
         h1 {
             font-size: 3em;
             margin-bottom: 10px;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+            color: #f0d9b5;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
         }
 
         .subtitle {
             font-size: 1.2em;
-            opacity: 0.9;
+            opacity: 0.7;
+            color: #999;
         }
 
         .connection-status {
@@ -47,11 +49,21 @@
             border-radius: 20px;
             font-size: 0.9em;
             margin-top: 10px;
-            background: rgba(255,255,255,0.1);
+            background: #2a2825;
+            border: 1px solid #3d3d3d;
         }
 
-        .connected { background: rgba(76, 175, 80, 0.3) !important; }
-        .disconnected { background: rgba(244, 67, 54, 0.3) !important; }
+        .connected { 
+            background: rgba(40, 167, 69, 0.2) !important;
+            border-color: #28a745 !important;
+            color: #28a745;
+        }
+
+        .disconnected { 
+            background: rgba(220, 53, 69, 0.2) !important;
+            border-color: #dc3545 !important;
+            color: #dc3545;
+        }
 
         .stats-grid {
             display: grid;
@@ -61,33 +73,35 @@
         }
 
         .stat-card {
-            background: rgba(255,255,255,0.1);
-            backdrop-filter: blur(10px);
+            background: #2a2825;
+            border: 1px solid #3d3d3d;
             border-radius: 15px;
             padding: 25px;
             text-align: center;
-            box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+            box-shadow: 0 8px 32px rgba(0,0,0,0.4);
         }
 
         .stat-value {
             font-size: 2.5em;
             font-weight: bold;
             margin: 10px 0;
+            color: #81b64c;
         }
 
         .stat-label {
             font-size: 1em;
-            opacity: 0.8;
+            opacity: 0.7;
             text-transform: uppercase;
             letter-spacing: 1px;
+            color: #999;
         }
 
         .leaderboard {
-            background: rgba(255,255,255,0.1);
-            backdrop-filter: blur(10px);
+            background: #2a2825;
+            border: 1px solid #3d3d3d;
             border-radius: 15px;
             padding: 30px;
-            box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+            box-shadow: 0 8px 32px rgba(0,0,0,0.4);
             margin-bottom: 30px;
         }
 
@@ -95,16 +109,25 @@
             font-size: 2em;
             margin-bottom: 25px;
             padding-bottom: 15px;
-            border-bottom: 2px solid rgba(255,255,255,0.2);
+            border-bottom: 2px solid #3d3d3d;
+            color: #f0d9b5;
+        }
+
+        .table-wrapper {
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            margin: 0 -15px;
+            padding: 0 15px;
         }
 
         table {
             width: 100%;
             border-collapse: collapse;
+            min-width: 100%;
         }
 
         thead {
-            background: rgba(255,255,255,0.1);
+            background: #1a1a1a;
         }
 
         th, td {
@@ -117,20 +140,22 @@
             text-transform: uppercase;
             font-size: 0.9em;
             letter-spacing: 1px;
+            color: #999;
         }
 
         tbody tr {
-            border-bottom: 1px solid rgba(255,255,255,0.1);
+            border-bottom: 1px solid #3d3d3d;
             transition: background 0.3s;
         }
 
         tbody tr:hover {
-            background: rgba(255,255,255,0.05);
+            background: #33302c;
         }
 
         .rank {
             font-weight: bold;
             font-size: 1.2em;
+            color: #f0d9b5;
         }
 
         .medal {
@@ -141,29 +166,25 @@
         .engine-name {
             font-weight: 600;
             font-size: 1.1em;
+            color: #f0d9b5;
         }
 
         .points {
             font-weight: bold;
-            color: #4CAF50;
+            color: #81b64c;
             font-size: 1.2em;
         }
 
-        .percentage {
-            opacity: 0.8;
-            font-size: 0.9em;
-        }
-
         .win-rate {
-            color: #4CAF50;
+            color: #81b64c;
         }
 
         .draw-rate {
-            color: #FFC107;
+            color: #ffd700;
         }
 
         .loss-rate {
-            color: #F44336;
+            color: #dc3545;
         }
 
         .tc-stats {
@@ -177,7 +198,8 @@
         }
 
         .tc-card {
-            background: rgba(255,255,255,0.05);
+            background: #1a1a1a;
+            border: 1px solid #3d3d3d;
             border-radius: 10px;
             padding: 20px;
         }
@@ -187,7 +209,8 @@
             font-weight: 600;
             margin-bottom: 15px;
             padding-bottom: 10px;
-            border-bottom: 1px solid rgba(255,255,255,0.2);
+            border-bottom: 1px solid #3d3d3d;
+            color: #f0d9b5;
         }
 
         .tc-table {
@@ -201,38 +224,199 @@
         .last-updated {
             text-align: center;
             margin-top: 30px;
-            opacity: 0.7;
+            opacity: 0.5;
             font-size: 0.9em;
+            color: #666;
         }
 
+        /* Mobile styles */
         @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+
             h1 {
                 font-size: 2em;
             }
 
+            .subtitle {
+                font-size: 1em;
+            }
+
+            header {
+                padding: 20px 0;
+                margin-bottom: 20px;
+            }
+
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 10px;
+                margin-bottom: 20px;
+            }
+
+            .stat-card {
+                padding: 15px;
+            }
+
             .stat-value {
-                font-size: 2em;
+                font-size: 1.8em;
+            }
+
+            .stat-label {
+                font-size: 0.8em;
+            }
+
+            .leaderboard {
+                padding: 15px;
+                margin-bottom: 20px;
+                border-radius: 10px;
+            }
+
+            h2 {
+                font-size: 1.4em;
+                margin-bottom: 15px;
+            }
+
+            .table-wrapper {
+                margin: 0 -15px;
+                padding: 0 15px;
             }
 
             table {
-                font-size: 0.9em;
+                font-size: 0.75em;
+                display: block;
+                overflow-x: auto;
+                white-space: nowrap;
+            }
+
+            thead, tbody, tr {
+                display: table;
+                width: 100%;
+                table-layout: fixed;
             }
 
             th, td {
-                padding: 10px 5px;
+                padding: 10px 6px;
+            }
+
+            th:nth-child(1), td:nth-child(1) { width: 60px; } /* Rank */
+            th:nth-child(2), td:nth-child(2) { width: 120px; } /* Engine */
+            th:nth-child(3), td:nth-child(3) { width: 60px; } /* Games */
+            th:nth-child(4), td:nth-child(4) { width: 70px; } /* Points */
+            th:nth-child(5), td:nth-child(5) { width: 50px; } /* Wins */
+            th:nth-child(6), td:nth-child(6) { width: 50px; } /* Draws */
+            th:nth-child(7), td:nth-child(7) { width: 50px; } /* Losses */
+            th:nth-child(8), td:nth-child(8) { width: 70px; } /* Win Rate */
+
+            .medal {
+                font-size: 1.1em;
+            }
+
+            .rank {
+                font-size: 0.95em;
+            }
+
+            .engine-name {
+                font-size: 0.95em;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+            }
+
+            .points {
+                font-size: 0.95em;
             }
 
             .tc-grid {
                 grid-template-columns: 1fr;
+                gap: 15px;
             }
+
+            .tc-card {
+                padding: 15px;
+            }
+
+            .tc-title {
+                font-size: 1.1em;
+            }
+
+            .tc-table {
+                font-size: 0.8em;
+                display: block;
+                overflow-x: auto;
+            }
+
+            .tc-table thead, .tc-table tbody, .tc-table tr {
+                display: table;
+                width: 100%;
+                table-layout: fixed;
+            }
+
+            .tc-table td, .tc-table th {
+                padding: 8px 4px;
+            }
+
+            .tc-table th:nth-child(1), .tc-table td:nth-child(1) { width: 100px; } /* Engine */
+            .tc-table th:nth-child(2), .tc-table td:nth-child(2) { width: 50px; } /* Games */
+            .tc-table th:nth-child(3), .tc-table td:nth-child(3) { width: 40px; } /* W */
+            .tc-table th:nth-child(4), .tc-table td:nth-child(4) { width: 40px; } /* D */
+            .tc-table th:nth-child(5), .tc-table td:nth-child(5) { width: 40px; } /* L */
+            .tc-table th:nth-child(6), .tc-table td:nth-child(6) { width: 60px; } /* Win% */
+        }
+
+        @media (max-width: 400px) {
+            h1 {
+                font-size: 1.6em;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .stat-value {
+                font-size: 1.5em;
+            }
+
+            table {
+                font-size: 0.7em;
+            }
+
+            th, td {
+                padding: 8px 4px;
+            }
+
+            th:nth-child(2), td:nth-child(2) { width: 100px; } /* Engine name shorter */
+
+            .tc-table {
+                font-size: 0.75em;
+            }
+        }
+
+        /* Scrollbar styling */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #1a1a1a;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #444;
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #555;
         }
     </style>
 </head>
 <body>
     <div class="container">
         <header>
-            <h1>🏆 EngineLab Leaderboard</h1>
-            <p class="subtitle">Real-time Chess Engine Statistics</p>
+            <h1>EngineLab</h1>
+            <p class="subtitle">Real-time Leaderboard</p>
             <div class="connection-status" id="status">
                 <span id="statusText">Connecting...</span>
             </div>
@@ -259,25 +443,27 @@
 
         <div class="leaderboard">
             <h2>🏅 Overall Standings</h2>
-            <table>
-                <thead>
-                    <tr>
-                        <th>Rank</th>
-                        <th>Engine</th>
-                        <th>Games</th>
-                        <th>Points</th>
-                        <th>Wins</th>
-                        <th>Draws</th>
-                        <th>Losses</th>
-                        <th>Win Rate</th>
-                    </tr>
-                </thead>
-                <tbody id="leaderboardBody">
-                    <tr>
-                        <td colspan="8" style="text-align: center; opacity: 0.5;">Waiting for data...</td>
-                    </tr>
-                </tbody>
-            </table>
+            <div class="table-wrapper">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Rank</th>
+                            <th>Engine</th>
+                            <th>Games</th>
+                            <th>Points</th>
+                            <th>Wins</th>
+                            <th>Draws</th>
+                            <th>Losses</th>
+                            <th>Win Rate</th>
+                        </tr>
+                    </thead>
+                    <tbody id="leaderboardBody">
+                        <tr>
+                            <td colspan="8" style="text-align: center; opacity: 0.5;">Waiting for data...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
         </div>
 
         <div class="leaderboard tc-stats">
