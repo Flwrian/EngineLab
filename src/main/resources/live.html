@@ -1,0 +1,1698 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EngineLab - Live Chess</title>
+    <link rel="stylesheet" href="/static/chessground.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: #161512;
+            color: #bababa;
+            height: 100vh;
+            overflow: hidden;
+            display: flex;
+        }
+
+        /* Sidebar */
+        #sidebar {
+            width: 320px;
+            background: #262421;
+            border-right: 1px solid #3d3d3d;
+            display: flex;
+            flex-direction: column;
+            flex-shrink: 0;
+            height: 100vh;
+        }
+
+        .sidebar-header {
+            padding: 20px;
+            background: #1a1a1a;
+            border-bottom: 1px solid #3d3d3d;
+            flex-shrink: 0;
+        }
+
+        .sidebar-header h1 {
+            font-size: 1.6em;
+            color: #f0d9b5;
+            margin-bottom: 8px;
+            font-weight: 700;
+        }
+
+        .sidebar-header .status {
+            font-size: 0.9em;
+            color: #999;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #dc3545;
+        }
+
+        .status.connected .status-dot {
+            background: #28a745;
+            box-shadow: 0 0 8px #28a745;
+        }
+
+        #game-list {
+            flex: 1;
+            overflow-y: auto;
+            padding: 12px;
+        }
+
+        .game-section {
+            margin-bottom: 16px;
+        }
+
+        .section-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 8px 12px;
+            background: #1a1a1a;
+            border-radius: 6px;
+            margin-bottom: 8px;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .section-header:hover {
+            background: #222;
+        }
+
+        .section-title {
+            font-size: 0.85em;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: #999;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .section-count {
+            background: #81b64c;
+            color: #1a1a1a;
+            font-size: 0.75em;
+            font-weight: 700;
+            padding: 2px 6px;
+            border-radius: 10px;
+            min-width: 20px;
+            text-align: center;
+        }
+
+        .section-toggle {
+            font-size: 1.2em;
+            transition: transform 0.2s;
+        }
+
+        .section-toggle.collapsed {
+            transform: rotate(-90deg);
+        }
+
+        .section-games {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .section-games.collapsed {
+            display: none;
+        }
+
+        .game-item {
+            background: #2a2825;
+            border: 2px solid transparent;
+            border-radius: 8px;
+            padding: 12px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .game-item:hover {
+            background: #33302c;
+            border-color: #4a4a4a;
+        }
+
+        .game-item.active {
+            border-color: #81b64c;
+            background: #2d3a1f;
+        }
+
+        .game-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .game-title {
+            font-weight: 600;
+            font-size: 1em;
+            color: #f0d9b5;
+        }
+
+        .game-status {
+            font-size: 0.85em;
+            padding: 3px 10px;
+            border-radius: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .game-status.live {
+            background: #28a745;
+            color: white;
+        }
+
+        .game-status.finished {
+            background: #6c757d;
+            color: white;
+        }
+
+        .game-player {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 6px 0;
+            font-size: 0.9em;
+        }
+
+        .player-name {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .player-icon {
+            font-size: 1.2em;
+        }
+
+        .player-clock {
+            font-family: 'Courier New', monospace;
+            font-weight: 700;
+            color: #81b64c;
+            font-size: 0.95em;
+        }
+
+        /* Main Content */
+        #main-content {
+            flex: 1;
+            display: flex;
+            align-items: flex-start;
+            justify-content: center;
+            padding: 20px;
+            overflow-y: auto;
+            overflow-x: hidden;
+        }
+
+        #no-games {
+            text-align: center;
+            color: #666;
+        }
+
+        #no-games h2 {
+            font-size: 2em;
+            color: #888;
+            margin-bottom: 12px;
+        }
+
+        #no-games p {
+            font-size: 1.1em;
+        }
+
+        #board-container {
+            width: 100%;
+            max-width: 550px;
+            display: none;
+            margin: 0 auto;
+            padding: 10px 0;
+        }
+
+        #board-container.visible {
+            display: block;
+        }
+
+        .player-bar {
+            background: #2a2825;
+            border-radius: 8px;
+            padding: 8px 14px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .player-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .player-details {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .player-eval {
+            font-size: 0.85em;
+            font-family: 'Courier New', monospace;
+            font-weight: 700;
+            color: #81b64c;
+            display: none;
+        }
+
+        .player-eval.negative {
+            color: #dc3545;
+        }
+
+        .player-pv {
+            font-size: 0.75em;
+            font-family: 'Courier New', monospace;
+            color: #999;
+            display: none;
+            margin-top: 2px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 200px;
+        }
+
+        .player-pv::before {
+            content: "PV: ";
+            color: #666;
+        }
+
+        .player-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.4em;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            flex-shrink: 0;
+        }
+
+        .player-avatar.white {
+            background: linear-gradient(135deg, #f0d9b5 0%, #d4c4a8 100%);
+        }
+
+        .player-name-large {
+            font-size: 1em;
+            font-weight: 700;
+            color: #f0d9b5;
+        }
+
+        .player-clock-large {
+            font-size: 1.3em;
+            font-weight: 800;
+            font-family: 'Courier New', monospace;
+            color: #81b64c;
+            background: #1a1a1a;
+            padding: 6px 12px;
+            border-radius: 8px;
+            min-width: 75px;
+            text-align: center;
+            flex-shrink: 0;
+        }
+
+        .player-clock-large.low-time {
+            color: #dc3545;
+            animation: pulse 1s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.6; }
+        }
+
+        /* Board */
+        #board-wrapper {
+            width: 100%;
+            aspect-ratio: 1 / 1;
+            position: relative;
+            margin-bottom: 8px;
+        }
+
+        #board {
+            width: 100%;
+            height: 100%;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
+        }
+
+        /* Arrow overlay for engine suggestions */
+        #board-arrows {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 100;
+        }
+
+        /* SVG arrows will be dynamically added here */
+        .engine-arrow {
+            stroke-width: 7;
+            stroke-linecap: round;
+            marker-end: url(#arrowhead);
+            opacity: 0.8;
+            filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+        }
+
+        .engine-arrow.primary {
+            stroke: #81b64c;
+            stroke-width: 8;
+            opacity: 0.9;
+        }
+
+        .engine-arrow.secondary {
+            stroke: #ffd700;
+            stroke-width: 7;
+            opacity: 0.7;
+        }
+
+        .engine-arrow.tertiary {
+            stroke: #4a9eff;
+            stroke-width: 6;
+            opacity: 0.6;
+        }
+
+        .cg-wrap {
+            width: 100%;
+            height: 100%;
+        }
+
+        /* Damier SVG */
+        cg-board {
+            background-color: #b58863;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 8 8'%3E%3Crect fill='%23b58863' width='8' height='8'/%3E%3Cpath fill='%23f0d9b5' d='M0 0h1v1H0zM2 0h1v1H2zM4 0h1v1H4zM6 0h1v1H6zM1 1h1v1H1zM3 1h1v1H3zM5 1h1v1H5zM7 1h1v1H7zM0 2h1v1H0zM2 2h1v1H2zM4 2h1v1H4zM6 2h1v1H6zM1 3h1v1H1zM3 3h1v1H3zM5 3h1v1H5zM7 3h1v1H7zM0 4h1v1H0zM2 4h1v1H2zM4 4h1v1H4zM6 4h1v1H6zM1 5h1v1H1zM3 5h1v1H3zM5 5h1v1H5zM7 5h1v1H7zM0 6h1v1H0zM2 6h1v1H2zM4 6h1v1H4zM6 6h1v1H6zM1 7h1v1H1zM3 7h1v1H3zM5 7h1v1H5zM7 7h1v1H7z'/%3E%3C/svg%3E");
+            background-size: 100% 100%;
+        }
+
+        /* Pièces SVG */
+        piece.white.king { background-image: url('/static/pieces/wK.svg'); }
+        piece.white.queen { background-image: url('/static/pieces/wQ.svg'); }
+        piece.white.rook { background-image: url('/static/pieces/wR.svg'); }
+        piece.white.bishop { background-image: url('/static/pieces/wB.svg'); }
+        piece.white.knight { background-image: url('/static/pieces/wN.svg'); }
+        piece.white.pawn { background-image: url('/static/pieces/wP.svg'); }
+        piece.black.king { background-image: url('/static/pieces/bK.svg'); }
+        piece.black.queen { background-image: url('/static/pieces/bQ.svg'); }
+        piece.black.rook { background-image: url('/static/pieces/bR.svg'); }
+        piece.black.bishop { background-image: url('/static/pieces/bB.svg'); }
+        piece.black.knight { background-image: url('/static/pieces/bN.svg'); }
+        piece.black.pawn { background-image: url('/static/pieces/bP.svg'); }
+
+        piece {
+            background-size: 88%;
+            background-repeat: no-repeat;
+            background-position: center;
+        }
+
+        /* Highlight */
+        .cg-wrap square.last-move {
+            background-color: rgba(155, 199, 0, 0.41);
+        }
+
+        .cg-wrap square.selected {
+            background-color: rgba(20, 85, 30, 0.5);
+        }
+
+        /* Coordinates */
+        coords {
+            color: #8b8b8b;
+            font-weight: 600;
+        }
+
+        /* Moves */
+        .moves-section {
+            background: #2a2825;
+            border-radius: 8px;
+            padding: 10px;
+            max-height: 140px;
+            overflow-y: auto;
+        }
+
+        .moves-section h3 {
+            font-size: 0.9em;
+            color: #999;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: 600;
+        }
+
+        .moves-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(85px, 1fr));
+            gap: 6px;
+        }
+
+        .move-pair {
+            display: flex;
+            gap: 4px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.85em;
+        }
+
+        .move-number {
+            color: #81b64c;
+            font-weight: 700;
+            min-width: 22px;
+        }
+
+        .move-item {
+            background: #1a1a1a;
+            padding: 4px 6px;
+            border-radius: 4px;
+            color: #f0d9b5;
+            flex: 1;
+            text-align: center;
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #1a1a1a;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #444;
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #555;
+        }
+
+        /* Keyboard shortcuts indicator */
+        .keyboard-hint {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: rgba(26, 26, 26, 0.95);
+            border: 1px solid #3d3d3d;
+            border-radius: 8px;
+            padding: 12px 16px;
+            color: #999;
+            font-size: 0.8em;
+            backdrop-filter: blur(10px);
+            z-index: 1000;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s;
+        }
+
+        .keyboard-hint.visible {
+            opacity: 1;
+        }
+
+        .keyboard-hint kbd {
+            background: #2a2825;
+            border: 1px solid #444;
+            border-radius: 4px;
+            padding: 2px 6px;
+            font-family: monospace;
+            font-size: 0.9em;
+            color: #81b64c;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+        }
+
+        /* Responsive */
+        @media (max-width: 1200px) {
+            #sidebar {
+                width: 280px;
+            }
+            
+            #board-container {
+                max-width: 600px;
+            }
+            
+            .player-name-large {
+                font-size: 1em;
+            }
+            
+            .player-clock-large {
+                font-size: 1.3em;
+                padding: 6px 12px;
+                min-width: 70px;
+            }
+        }
+
+        @media (max-width: 900px) {
+            body {
+                flex-direction: column;
+            }
+            
+            #sidebar {
+                width: 100%;
+                height: auto;
+                max-height: 180px;
+                border-right: none;
+                border-bottom: 1px solid #3d3d3d;
+                overflow-y: auto;
+            }
+            
+            #main-content {
+                height: calc(100vh - 180px);
+                padding: 15px;
+            }
+            
+            #board-container {
+                max-width: 500px;
+            }
+            
+            .sidebar-header {
+                padding: 15px;
+            }
+            
+            .sidebar-header h1 {
+                font-size: 1.4em;
+            }
+            
+            #game-list {
+                padding: 10px;
+            }
+        }
+
+        @media (max-width: 600px) {
+            #sidebar {
+                max-height: 150px;
+            }
+            
+            #main-content {
+                height: calc(100vh - 150px);
+                padding: 10px;
+            }
+            
+            #board-container {
+                max-width: 100%;
+            }
+            
+            .sidebar-header {
+                padding: 12px;
+            }
+            
+            .sidebar-header h1 {
+                font-size: 1.2em;
+            }
+            
+            .game-item {
+                padding: 10px;
+                font-size: 0.9em;
+            }
+            
+            .player-bar {
+                padding: 10px 12px;
+                margin-bottom: 8px;
+            }
+            
+            .player-avatar {
+                width: 32px;
+                height: 32px;
+                font-size: 1.2em;
+            }
+            
+            .player-name-large {
+                font-size: 0.9em;
+            }
+            
+            .player-clock-large {
+                font-size: 1.1em;
+                padding: 6px 10px;
+                min-width: 60px;
+            }
+            
+            .moves-section {
+                padding: 10px;
+                max-height: 120px;
+            }
+            
+            .moves-section h3 {
+                font-size: 0.8em;
+            }
+            
+            .moves-list {
+                grid-template-columns: repeat(auto-fill, minmax(75px, 1fr));
+                gap: 4px;
+            }
+            
+            .move-pair {
+                font-size: 0.75em;
+            }
+        }
+
+        @media (max-height: 700px) {
+            .moves-section {
+                max-height: 100px;
+            }
+            
+            .player-bar {
+                padding: 8px 12px;
+            }
+            
+            .player-clock-large {
+                font-size: 1.2em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="sidebar">
+        <div class="sidebar-header">
+            <h1>⚡ EngineLab</h1>
+            <div class="status" id="status">
+                <span class="status-dot"></span>
+                Connecting...
+            </div>
+        </div>
+        <div id="game-list"></div>
+    </div>
+
+    <div id="main-content">
+        <div id="no-games">
+            <h2>🎮 No Active Games</h2>
+            <p>Waiting for matches to start...</p>
+        </div>
+        
+        <div id="board-container">
+            <div class="player-bar">
+                <div class="player-info">
+                    <div class="player-avatar">♚</div>
+                    <div class="player-details">
+                        <div class="player-name-large" id="black-name">Black</div>
+                        <!-- Engine evaluation score (hidden by default) -->
+                        <div class="player-eval" id="black-eval">+0.00</div>
+                        <!-- Principal Variation -->
+                        <div class="player-pv" id="black-pv"></div>
+                    </div>
+                </div>
+                <div class="player-right">
+                    <div class="player-clock-large" id="black-clock">--:--</div>
+                </div>
+            </div>
+            
+            <div id="board-wrapper">
+                <div id="board"></div>
+                <!-- SVG overlay for arrows -->
+                <svg id="board-arrows">
+                    <defs>
+                        <marker id="arrowhead" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto" markerUnits="strokeWidth">
+                            <path d="M 0 0 L 6 3 L 0 6 L 1.5 3 z" fill="#81b64c" opacity="0.9" />
+                        </marker>
+                    </defs>
+                </svg>
+            </div>
+            
+            <div class="player-bar">
+                <div class="player-info">
+                    <div class="player-avatar white">♔</div>
+                    <div class="player-details">
+                        <div class="player-name-large" id="white-name">White</div>
+                        <!-- Engine evaluation score (hidden by default) -->
+                        <div class="player-eval" id="white-eval">+0.00</div>
+                        <!-- Principal Variation -->
+                        <div class="player-pv" id="white-pv"></div>
+                    </div>
+                </div>
+                <div class="player-right">
+                    <div class="player-clock-large" id="white-clock">--:--</div>
+                </div>
+            </div>
+            
+            <div class="moves-section">
+                <h3>Move History</h3>
+                <div class="moves-list" id="moves-list"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Keyboard shortcuts hint -->
+    <div class="keyboard-hint" id="keyboard-hint">
+        <kbd>Tab</kbd> Next game &nbsp;|&nbsp; <kbd>Shift+Tab</kbd> Previous game &nbsp;|&nbsp; <kbd>?</kbd> Toggle help
+    </div>
+
+    <script src="/static/chessground.js"></script>
+    <script>
+        const games = new Map();
+        let board = null;
+        let currentGameId = null;
+        let ws = null;
+        let reconnectAttempts = 0;
+        let clockInterval = null;
+        let archivedCollapsed = false;
+
+        // Initialize Chessground
+        if (typeof Chessground !== 'undefined' && typeof Chessground.Chessground === 'function') {
+            console.log('✅ Chessground loaded successfully');
+            const boardElement = document.getElementById('board');
+            console.log('📦 Board element:', boardElement);
+            board = Chessground.Chessground(boardElement, {
+                coordinates: true,
+                viewOnly: true,
+                animation: {
+                    enabled: true,
+                    duration: 200
+                },
+                highlight: {
+                    lastMove: true,
+                    check: true
+                }
+            });
+            console.log('♟️ Chessground instance created:', board);
+        } else {
+            console.error('❌ Failed to load Chessground library');
+        }
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', (e) => {
+            // Ignore if typing in input
+            if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+            
+            if (e.key === 'Tab') {
+                e.preventDefault();
+                if (e.shiftKey) {
+                    switchToPreviousGame();
+                } else {
+                    switchToNextGame();
+                }
+            } else if (e.key === '?') {
+                toggleKeyboardHint();
+            }
+        });
+
+        function getActiveGameIds() {
+            const activeGames = [];
+            for (const [gameId, game] of games) {
+                if (game.status === 'running') {
+                    activeGames.push(gameId);
+                }
+            }
+            return activeGames.sort((a, b) => a - b);
+        }
+
+        function switchToNextGame() {
+            const activeGames = getActiveGameIds();
+            if (activeGames.length === 0) return;
+            
+            const currentIndex = activeGames.indexOf(currentGameId);
+            const nextIndex = (currentIndex + 1) % activeGames.length;
+            showGame(activeGames[nextIndex]);
+            
+            // Flash keyboard hint
+            showKeyboardHint();
+        }
+
+        function switchToPreviousGame() {
+            const activeGames = getActiveGameIds();
+            if (activeGames.length === 0) return;
+            
+            const currentIndex = activeGames.indexOf(currentGameId);
+            const prevIndex = currentIndex <= 0 ? activeGames.length - 1 : currentIndex - 1;
+            showGame(activeGames[prevIndex]);
+            
+            // Flash keyboard hint
+            showKeyboardHint();
+        }
+
+        let keyboardHintTimeout;
+        function showKeyboardHint() {
+            const hint = document.getElementById('keyboard-hint');
+            hint.classList.add('visible');
+            
+            clearTimeout(keyboardHintTimeout);
+            keyboardHintTimeout = setTimeout(() => {
+                hint.classList.remove('visible');
+            }, 2000);
+        }
+
+        function toggleKeyboardHint() {
+            const hint = document.getElementById('keyboard-hint');
+            hint.classList.toggle('visible');
+            
+            if (hint.classList.contains('visible')) {
+                clearTimeout(keyboardHintTimeout);
+            }
+        }
+
+        function connectWebSocket() {
+            const wsUrl = `ws://${window.location.host}/ws`;
+            console.log(`🔌 Connecting to ${wsUrl}...`);
+            ws = new WebSocket(wsUrl);
+
+            ws.onopen = () => {
+                console.log('✅ WebSocket connected');
+                reconnectAttempts = 0;
+                const statusEl = document.getElementById('status');
+                statusEl.innerHTML = '<span class="status-dot"></span>Connected';
+                statusEl.className = 'status connected';
+            };
+
+            ws.onclose = () => {
+                console.log('❌ WebSocket disconnected');
+                const statusEl = document.getElementById('status');
+                statusEl.innerHTML = '<span class="status-dot"></span>Disconnected';
+                statusEl.className = 'status';
+                
+                if (reconnectAttempts < 10) {
+                    const delay = Math.min(1000 * Math.pow(2, reconnectAttempts), 30000);
+                    reconnectAttempts++;
+                    console.log(`🔄 Reconnecting in ${delay}ms (attempt ${reconnectAttempts})...`);
+                    setTimeout(connectWebSocket, delay);
+                }
+            };
+
+            ws.onerror = (error) => {
+                console.error('❌ WebSocket error:', error);
+            };
+
+            ws.onmessage = (event) => {
+                try {
+                    const message = JSON.parse(event.data);
+                    console.log('📨 Message received:', message.type, message);
+                    handleMessage(message);
+                } catch (e) {
+                    console.error('Failed to parse WebSocket message:', e);
+                }
+            };
+        }
+
+        function handleMessage(message) {
+            switch (message.type) {
+                case 'connected':
+                    console.log('Server welcome:', message.message);
+                    break;
+                case 'game_start':
+                    handleGameStart(message);
+                    break;
+                case 'move':
+                    handleMove(message);
+                    break;
+                case 'engine_thinking':
+                    handleEngineThinking(message);
+                    break;
+                case 'game_end':
+                    handleGameEnd(message);
+                    break;
+                case 'server_shutdown':
+                    console.log('🛑 Server shutting down:', message.message);
+                    const statusEl = document.getElementById('status');
+                    statusEl.innerHTML = '<span class="status-dot"></span>Server stopped (refresh to reconnect)';
+                    statusEl.className = 'status';
+                    break;
+            }
+        }
+
+        function handleGameStart(data) {
+            const gameId = data.gameId;
+            console.log(`🎮 Game ${gameId} started`, data);
+            
+            // Check if we already have this game (reconnection scenario)
+            const existingGame = games.get(gameId);
+            
+            // Parse moves array if it's a JSON array
+            let moves = [];
+            if (data.moves) {
+                if (Array.isArray(data.moves)) {
+                    moves = data.moves;
+                } else if (data.moves.length) {
+                    // It might be an array-like object
+                    moves = Array.from(data.moves);
+                }
+                console.log('📥 Received moves:', moves.length, moves);
+            }
+            
+            const fen = data.fen || 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1';
+            console.log('🎯 Received FEN:', fen);
+            
+            games.set(gameId, {
+                white: data.white || 'Engine White',
+                black: data.black || 'Engine Black',
+                moves: moves.length > 0 ? moves : (existingGame?.moves || []),
+                fen: fen,
+                whiteTime: data.whiteTime || 0,
+                blackTime: data.blackTime || 0,
+                status: 'running',
+                whiteScore: data.whiteScore,
+                blackScore: data.blackScore,
+                whiteDepth: data.whiteDepth,
+                blackDepth: data.blackDepth,
+                whitePv: data.whitePv,
+                blackPv: data.blackPv,
+                lastUpdateTime: Date.now()
+            });
+
+            console.log('💾 Game stored:', games.get(gameId));
+
+            updateGameList();
+            
+            if (currentGameId === null || currentGameId === undefined) {
+                console.log('🎯 Showing game', gameId, 'as first game');
+                showGame(gameId);
+            } else if (currentGameId === gameId) {
+                console.log('🔄 Updating already watched game', gameId);
+                updateBoard();
+            }
+        }
+
+        function handleMove(data) {
+            const game = games.get(data.gameId);
+            if (!game) return;
+            
+            game.moves.push(data.move);
+            game.fen = data.fen;
+            game.whiteTime = data.whiteTime || game.whiteTime;
+            game.blackTime = data.blackTime || game.blackTime;
+            game.lastUpdateTime = Date.now(); // Reset timer on move
+            
+            // Store evaluation data if present
+            if (data.whiteScore !== undefined) game.whiteScore = data.whiteScore;
+            if (data.blackScore !== undefined) game.blackScore = data.blackScore;
+            if (data.whiteDepth !== undefined) game.whiteDepth = data.whiteDepth;
+            if (data.blackDepth !== undefined) game.blackDepth = data.blackDepth;
+            if (data.whitePv !== undefined) game.whitePv = data.whitePv;
+            if (data.blackPv !== undefined) game.blackPv = data.blackPv;
+            
+            if (currentGameId === data.gameId) {
+                updateBoard();
+                
+                // Update evaluations if available
+                if (game.whiteScore !== undefined) {
+                    updateEngineEval('white', game.whiteScore, game.whiteDepth);
+                    updatePv('white', game.whitePv);
+                }
+                if (game.blackScore !== undefined) {
+                    updateEngineEval('black', game.blackScore, game.blackDepth);
+                    updatePv('black', game.blackPv);
+                }
+                
+                // Draw arrows for the PV of the side to move
+                const isWhiteTurn = game.fen.split(' ')[1] === 'w';
+                const pv = isWhiteTurn ? game.whitePv : game.blackPv;
+                if (pv) {
+                    drawPvArrows(pv, game.fen);
+                }
+            }
+            
+            // Only update clocks in sidebar, not the whole list
+            updateGameClocks();
+        }
+
+        function handleEngineThinking(data) {
+            console.log('🧠 handleEngineThinking:', data);
+            
+            // Only update if we're watching this game
+            if (currentGameId !== data.gameId) {
+                console.log('⏭️ Skipping: not watching this game');
+                return;
+            }
+            
+            const game = games.get(data.gameId);
+            if (!game) {
+                console.log('⚠️ Game not found:', data.gameId);
+                return;
+            }
+            
+            // Update evaluation display
+            const color = data.isWhite ? 'white' : 'black';
+            if (data.score !== undefined) {
+                console.log(`📊 Updating ${color} eval:`, data.score, 'depth:', data.depth);
+                updateEngineEval(color, data.score, data.depth);
+            }
+            
+            // Update PV display
+            if (data.pv) {
+                console.log(`📝 Updating ${color} PV:`, data.pv);
+                updatePv(color, data.pv);
+                
+                // Draw arrow for first PV move in real-time
+                drawPvArrows(data.pv, game.fen);
+            }
+        }
+
+        function handleGameEnd(data) {
+            const game = games.get(data.gameId);
+            if (!game) return;
+            
+            game.status = 'finished';
+            game.result = data.result;
+            game.reason = data.reason;
+            
+            console.log(`🏁 Game ${data.gameId} ended:`, data.result, data.reason);
+            
+            // Stop clock timer if this is the current game
+            if (currentGameId === data.gameId) {
+                console.log('⏱️ Stopping clock for finished game', data.gameId);
+                if (clockInterval) {
+                    clearInterval(clockInterval);
+                    clockInterval = null;
+                }
+            }
+            
+            // Update list first to reflect the change
+            updateGameList();
+            
+            // Auto-switch to an active game if current game ended
+            if (currentGameId === data.gameId) {
+                updateBoard();
+                
+                // Wait a bit for everything to update, then find next active game
+                setTimeout(() => {
+                    const activeGames = getActiveGameIds();
+                    console.log('🔍 Looking for active games:', activeGames);
+                    
+                    if (activeGames.length > 0) {
+                        console.log('🔄 Switching to next active game:', activeGames[0]);
+                        showGame(activeGames[0]);
+                    } else {
+                        console.log('ℹ️ No more active games');
+                    }
+                }, 2000); // 2 seconds delay to show final state
+            }
+        }
+
+        function updateGameList() {
+            const container = document.getElementById('game-list');
+            container.innerHTML = '';
+
+            if (games.size === 0) {
+                document.getElementById('no-games').style.display = 'block';
+                document.getElementById('board-container').classList.remove('visible');
+                return;
+            }
+
+            document.getElementById('no-games').style.display = 'none';
+
+            // Separate active and archived games
+            const activeGames = [];
+            const archivedGames = [];
+            
+            for (const [gameId, game] of games) {
+                if (game.status === 'running') {
+                    activeGames.push([gameId, game]);
+                } else {
+                    archivedGames.push([gameId, game]);
+                }
+            }
+
+            // Sort by game ID
+            activeGames.sort((a, b) => a[0] - b[0]);
+            archivedGames.sort((a, b) => b[0] - a[0]); // Reverse order for archived
+
+            // Active games section
+            if (activeGames.length > 0) {
+                const activeSection = createGameSection('🔴 Live Games', activeGames, false);
+                container.appendChild(activeSection);
+            }
+
+            // Archived games section
+            if (archivedGames.length > 0) {
+                const archivedSection = createGameSection('📁 Archived Games', archivedGames, archivedCollapsed);
+                container.appendChild(archivedSection);
+            }
+        }
+
+        function createGameSection(title, gamesArray, collapsed) {
+            const section = document.createElement('div');
+            section.className = 'game-section';
+
+            // Section header
+            const header = document.createElement('div');
+            header.className = 'section-header';
+            header.onclick = () => {
+                const gamesContainer = section.querySelector('.section-games');
+                const toggle = section.querySelector('.section-toggle');
+                gamesContainer.classList.toggle('collapsed');
+                toggle.classList.toggle('collapsed');
+                
+                // Remember state for archived section
+                if (title.includes('Archived')) {
+                    archivedCollapsed = gamesContainer.classList.contains('collapsed');
+                }
+            };
+
+            header.innerHTML = `
+                <div class="section-title">
+                    ${title}
+                    <span class="section-count">${gamesArray.length}</span>
+                </div>
+                <span class="section-toggle ${collapsed ? 'collapsed' : ''}">▼</span>
+            `;
+
+            section.appendChild(header);
+
+            // Games container
+            const gamesContainer = document.createElement('div');
+            gamesContainer.className = 'section-games' + (collapsed ? ' collapsed' : '');
+
+            for (const [gameId, game] of gamesArray) {
+                const item = document.createElement('div');
+                item.className = 'game-item' + (currentGameId === gameId ? ' active' : '');
+                item.setAttribute('data-game-id', gameId);
+                item.onclick = () => showGame(gameId);
+
+                const statusClass = game.status === 'running' ? 'live' : 'finished';
+                const statusText = game.status === 'running' ? 'Live' : (game.result || 'Finished');
+
+                item.innerHTML = `
+                    <div class="game-header">
+                        <div class="game-title">Game #${gameId}</div>
+                        <div class="game-status ${statusClass}">${statusText}</div>
+                    </div>
+                    <div class="game-player">
+                        <div class="player-name">
+                            <span class="player-icon">♔</span>
+                            <span>${game.white}</span>
+                        </div>
+                        <span class="player-clock">${formatTime(game.whiteTime)}</span>
+                    </div>
+                    <div class="game-player">
+                        <div class="player-name">
+                            <span class="player-icon">♚</span>
+                            <span>${game.black}</span>
+                        </div>
+                        <span class="player-clock">${formatTime(game.blackTime)}</span>
+                    </div>
+                `;
+
+                gamesContainer.appendChild(item);
+            }
+
+            section.appendChild(gamesContainer);
+            return section;
+        }
+
+        function updateGameClocks() {
+            // Update only the clock displays in the sidebar without recreating DOM
+            for (const [gameId, game] of games) {
+                const gameItem = document.querySelector(`.game-item[data-game-id="${gameId}"]`);
+                if (gameItem) {
+                    const playerDivs = gameItem.querySelectorAll('.game-player');
+                    if (playerDivs.length >= 2) {
+                        const whiteClockEl = playerDivs[0].querySelector('.player-clock');
+                        const blackClockEl = playerDivs[1].querySelector('.player-clock');
+                        if (whiteClockEl) whiteClockEl.textContent = formatTime(game.whiteTime);
+                        if (blackClockEl) blackClockEl.textContent = formatTime(game.blackTime);
+                    }
+                }
+            }
+        }
+
+        function showGame(gameId) {
+            console.log('🎬 showGame called for', gameId);
+            currentGameId = gameId;
+            updateGameList();
+            updateBoard();
+            document.getElementById('board-container').classList.add('visible');
+            console.log('✅ Board container made visible');
+        }
+
+        function updateBoard() {
+            console.log('🔧 updateBoard called, currentGameId:', currentGameId, 'board:', board, 'board type:', typeof board);
+            
+            if (currentGameId === null || currentGameId === undefined) {
+                console.warn('⚠️ Cannot update board: currentGameId is null');
+                return;
+            }
+            
+            if (!board) {
+                console.warn('⚠️ Cannot update board: board is null');
+                return;
+            }
+
+            const game = games.get(currentGameId);
+            if (!game) {
+                console.warn('⚠️ Cannot update board: game not found for id', currentGameId);
+                return;
+            }
+
+            console.log('📊 Updating board:', {
+                gameId: currentGameId,
+                fen: game.fen,
+                movesCount: game.moves.length,
+                lastMoves: game.moves.slice(-3)
+            });
+
+            // Update Chessground board
+            const lastMove = game.moves.length > 0 ? game.moves[game.moves.length - 1] : null;
+            
+            const boardConfig = {
+                fen: game.fen,
+                lastMove: lastMove && lastMove.length >= 4 ? 
+                    [lastMove.substring(0, 2), lastMove.substring(2, 4)] : undefined
+            };
+            
+            console.log('🎯 Chessground config:', boardConfig);
+            board.set(boardConfig);
+            console.log('✅ Board updated successfully');
+
+            // Update player names
+            document.getElementById('white-name').textContent = game.white;
+            document.getElementById('black-name').textContent = game.black;
+
+            // Update clocks initially
+            updateClockDisplay();
+
+            // Update move list
+            const movesList = document.getElementById('moves-list');
+            movesList.innerHTML = '';
+            
+            for (let i = 0; i < game.moves.length; i += 2) {
+                const moveNumber = Math.floor(i / 2) + 1;
+                const whiteMove = game.moves[i];
+                const blackMove = game.moves[i + 1];
+                
+                const pairDiv = document.createElement('div');
+                pairDiv.className = 'move-pair';
+                
+                pairDiv.innerHTML = `
+                    <span class="move-number">${moveNumber}.</span>
+                    <span class="move-item">${whiteMove}</span>
+                    ${blackMove ? `<span class="move-item">${blackMove}</span>` : ''}
+                `;
+                
+                movesList.appendChild(pairDiv);
+            }
+
+            // Show game result if finished
+            if (game.status === 'finished') {
+                const resultDiv = document.createElement('div');
+                resultDiv.style.cssText = 'margin-top: 12px; padding: 10px; background: #1a1a1a; border-radius: 6px; text-align: center; color: #81b64c; font-weight: 700;';
+                resultDiv.textContent = `Game Over: ${game.result} (${game.reason})`;
+                movesList.appendChild(resultDiv);
+            }
+
+            // Update evaluations if available
+            if (game.whiteScore !== undefined) {
+                updateEngineEval('white', game.whiteScore, game.whiteDepth);
+                updatePv('white', game.whitePv);
+            }
+            if (game.blackScore !== undefined) {
+                updateEngineEval('black', game.blackScore, game.blackDepth);
+                updatePv('black', game.blackPv);
+            }
+            
+            // Draw arrows for the PV of the side to move
+            const isWhiteTurn = game.fen.split(' ')[1] === 'w';
+            const pv = isWhiteTurn ? game.whitePv : game.blackPv;
+            if (pv) {
+                drawPvArrows(pv, game.fen);
+            }
+
+            // Auto-scroll to bottom
+            movesList.scrollTop = movesList.scrollHeight;
+            
+            // Start clock update timer
+            startClockTimer();
+        }
+
+        function formatTime(ms, showMs = false) {
+            if (ms < 0) ms = 0;
+            
+            const totalSeconds = Math.floor(ms / 1000);
+            const minutes = Math.floor(totalSeconds / 60);
+            const seconds = totalSeconds % 60;
+            
+            // Show milliseconds if time is less than 10 seconds and showMs is true
+            if (showMs && ms < 10000) {
+                const milliseconds = Math.floor((ms % 1000) / 10); // Show centiseconds
+                return `${seconds}.${milliseconds.toString().padStart(2, '0')}`;
+            }
+            
+            return `${minutes}:${seconds.toString().padStart(2, '0')}`;
+        }
+
+        function startClockTimer() {
+            // Clear existing interval
+            if (clockInterval) {
+                clearInterval(clockInterval);
+                clockInterval = null;
+                console.log('⏱️ Cleared previous clock timer');
+            }
+            
+            // Don't start timer if game is finished
+            const game = games.get(currentGameId);
+            if (!game || game.status !== 'running') {
+                console.log('⏱️ Not starting timer - game not running');
+                return;
+            }
+            
+            console.log('⏱️ Starting clock timer for game', currentGameId);
+            
+            // Update clocks every 100ms for smooth countdown
+            clockInterval = setInterval(() => {
+                if (currentGameId === null || currentGameId === undefined) {
+                    console.log('⏱️ Stopping timer - no current game');
+                    clearInterval(clockInterval);
+                    clockInterval = null;
+                    return;
+                }
+                
+                const game = games.get(currentGameId);
+                if (!game || game.status !== 'running') {
+                    console.log('⏱️ Stopping timer - game finished or not found');
+                    clearInterval(clockInterval);
+                    clockInterval = null;
+                    return;
+                }
+                
+                // Determine whose turn it is
+                const isWhiteTurn = game.fen.split(' ')[1] === 'w';
+                
+                // Decrease time for the player whose turn it is
+                const now = Date.now();
+                if (!game.lastUpdateTime) {
+                    game.lastUpdateTime = now;
+                    return;
+                }
+                
+                const elapsed = now - game.lastUpdateTime;
+                game.lastUpdateTime = now;
+                
+                if (isWhiteTurn) {
+                    game.whiteTime = Math.max(0, game.whiteTime - elapsed);
+                } else {
+                    game.blackTime = Math.max(0, game.blackTime - elapsed);
+                }
+                
+                // Update clock display
+                updateClockDisplay();
+                
+            }, 100);
+        }
+
+        function updateClockDisplay() {
+            if (currentGameId === null || currentGameId === undefined) return;
+            
+            const game = games.get(currentGameId);
+            if (!game) return;
+            
+            const whiteClockEl = document.getElementById('white-clock');
+            const blackClockEl = document.getElementById('black-clock');
+            
+            // Show milliseconds if time is low (< 10 seconds)
+            const showWhiteMs = game.whiteTime < 10000;
+            const showBlackMs = game.blackTime < 10000;
+            
+            whiteClockEl.textContent = formatTime(game.whiteTime, showWhiteMs);
+            blackClockEl.textContent = formatTime(game.blackTime, showBlackMs);
+            
+            // Low time warning (less than 10 seconds)
+            whiteClockEl.className = 'player-clock-large' + (game.whiteTime < 10000 ? ' low-time' : '');
+            blackClockEl.className = 'player-clock-large' + (game.blackTime < 10000 ? ' low-time' : '');
+        }
+
+        // Connect on page load
+        connectWebSocket();
+
+        // ============================================
+        // ENGINE EVALUATION FUNCTIONS
+        // ============================================
+        
+        /**
+         * Function to update engine evaluation score
+         * Call this when receiving engine analysis from WebSocket
+         * 
+         * @param {string} color - 'white' or 'black'
+         * @param {number} score - Centipawn score (e.g., 50 = +0.50) or mate score
+         * @param {number} depth - Search depth (optional)
+         * 
+         * Example usage:
+         * updateEngineEval('white', 50, 12);  // +0.50 at depth 12
+         * updateEngineEval('black', -25, 15); // -0.25 at depth 15
+         * updateEngineEval('white', 9800, 8); // M2 at depth 8
+         */
+        function updateEngineEval(color, score, depth) {
+            const evalEl = document.getElementById(`${color}-eval`);
+            if (!evalEl) return;
+            
+            let displayScore;
+            
+            // Check for mate scores (>= 9000 centipawns)
+            if (Math.abs(score) >= 9000) {
+                const mateIn = Math.ceil((10000 - Math.abs(score)) / 100);
+                displayScore = score >= 0 ? `M${mateIn}` : `-M${mateIn}`;
+            } else {
+                // Regular centipawn score
+                const scoreValue = (score / 100).toFixed(2);
+                displayScore = score >= 0 ? `+${scoreValue}` : scoreValue;
+            }
+            
+            // Add depth info if available
+            if (depth !== undefined && depth !== null) {
+                displayScore += ` (d${depth})`;
+            }
+            
+            evalEl.textContent = displayScore;
+            evalEl.className = 'player-eval' + (score < 0 ? ' negative' : '');
+            evalEl.style.display = 'block';
+        }
+
+        /**
+         * Update the principal variation display
+         */
+        function updatePv(color, pv) {
+            const pvEl = document.getElementById(`${color}-pv`);
+            if (!pvEl) return;
+            
+            if (pv && pv.trim() !== '') {
+                pvEl.textContent = pv;
+                pvEl.style.display = 'block';
+            } else {
+                pvEl.style.display = 'none';
+            }
+        }
+
+        /**
+         * Draw arrow for the first move in the PV
+         */
+        function drawPvArrows(pv, fen) {
+            console.log('🎯 drawPvArrows called:', { pv, fen });
+            
+            const svgEl = document.getElementById('board-arrows');
+            if (!svgEl) {
+                console.error('❌ SVG element not found');
+                return;
+            }
+            
+            if (!pv) {
+                console.log('⚠️ No PV provided');
+                svgEl.style.display = 'none';
+                return;
+            }
+            
+            // Clear existing arrows
+            const arrows = svgEl.querySelectorAll('.engine-arrow');
+            console.log('🗑️ Clearing', arrows.length, 'existing arrows');
+            arrows.forEach(arrow => arrow.remove());
+            
+            // Get first move from PV
+            const moves = pv.trim().split(/\s+/);
+            console.log('📋 PV moves:', moves);
+            
+            if (moves.length === 0 || moves[0].length < 4) {
+                console.log('⚠️ Invalid first move:', moves[0]);
+                svgEl.style.display = 'none';
+                return;
+            }
+            
+            const move = moves[0];
+            const from = move.substring(0, 2);
+            const to = move.substring(2, 4);
+            console.log('➡️ Drawing arrow from', from, 'to', to);
+            
+            // Get board dimensions from the wrapper
+            const boardWrapper = document.getElementById('board-wrapper');
+            if (!boardWrapper) {
+                console.error('❌ Board wrapper not found');
+                return;
+            }
+            
+            const boardRect = boardWrapper.getBoundingClientRect();
+            const squareSize = boardRect.width / 8;
+            console.log('📏 Board dimensions:', { width: boardRect.width, squareSize });
+            
+            // Helper to convert square notation to coordinates
+            const squareToCoords = (square) => {
+                const file = square.charCodeAt(0) - 97; // a=0, b=1, etc.
+                const rank = 8 - parseInt(square[1]); // 8=0, 7=1, etc.
+                const coords = {
+                    x: (file + 0.5) * squareSize,
+                    y: (rank + 0.5) * squareSize
+                };
+                console.log(`📍 ${square} -> (${coords.x}, ${coords.y})`);
+                return coords;
+            };
+            
+            const fromCoords = squareToCoords(from);
+            const toCoords = squareToCoords(to);
+            
+            // Calculate direction vector
+            const dx = toCoords.x - fromCoords.x;
+            const dy = toCoords.y - fromCoords.y;
+            const length = Math.sqrt(dx * dx + dy * dy);
+            
+            // Normalize and shorten the arrow (start 20% from center, end 20% before center)
+            const startOffset = squareSize * 0.20;
+            const endOffset = squareSize * 0.20;
+            
+            const startX = fromCoords.x + (dx / length) * startOffset;
+            const startY = fromCoords.y + (dy / length) * startOffset;
+            const endX = toCoords.x - (dx / length) * endOffset;
+            const endY = toCoords.y - (dy / length) * endOffset;
+            
+            // Draw arrow
+            const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+            line.setAttribute('x1', startX);
+            line.setAttribute('y1', startY);
+            line.setAttribute('x2', endX);
+            line.setAttribute('y2', endY);
+            line.classList.add('engine-arrow', 'primary');
+            
+            svgEl.appendChild(line);
+            svgEl.style.display = 'block';
+            
+            console.log('✅ Arrow drawn successfully');
+        }
+
+        /*
+         * Function to update best move suggestion
+         * Call this when engine suggests a move
+         * 
+         * @param {string} color - 'white' or 'black'
+         * @param {string} move - UCI move notation (e.g., 'e2e4')
+         * @param {boolean} thinking - Whether engine is currently thinking
+         * 
+         * Example usage:
+         * updateBestMove('white', 'e2e4', true);
+         */
+        function updateBestMove(color, move, thinking = false) {
+            const moveEl = document.getElementById(`${color}-best-move`);
+            if (!moveEl) return;
+            
+            moveEl.textContent = move || '...';
+            moveEl.className = 'best-move-indicator' + (thinking ? ' thinking' : '');
+            moveEl.style.display = move ? 'block' : 'none';
+        }
+
+        /*
+         * Function to draw arrows on the board
+         * Call this to show engine's top move suggestions
+         * 
+         * @param {Array} moves - Array of move objects
+         *   Each move: { from: 'e2', to: 'e4', priority: 'primary'|'secondary'|'tertiary' }
+         * 
+         * Example usage:
+         * drawEngineArrows([
+         *   { from: 'e2', to: 'e4', priority: 'primary' },
+         *   { from: 'g1', to: 'f3', priority: 'secondary' }
+         * ]);
+         */
+        function drawEngineArrows(moves) {
+            const svgEl = document.getElementById('board-arrows');
+            if (!svgEl) return;
+            
+            // Clear existing arrows
+            const arrows = svgEl.querySelectorAll('.engine-arrow');
+            arrows.forEach(arrow => arrow.remove());
+            
+            if (!moves || moves.length === 0) {
+                svgEl.style.display = 'none';
+                return;
+            }
+            
+            svgEl.style.display = 'block';
+            
+            // Get board dimensions
+            const boardEl = document.getElementById('board');
+            const boardRect = boardEl.getBoundingClientRect();
+            const squareSize = boardRect.width / 8;
+            
+            // Helper to convert square notation to coordinates
+            const squareToCoords = (square) => {
+                const file = square.charCodeAt(0) - 97; // a=0, b=1, etc.
+                const rank = 8 - parseInt(square[1]); // 8=0, 7=1, etc.
+                return {
+                    x: (file + 0.5) * squareSize,
+                    y: (rank + 0.5) * squareSize
+                };
+            };
+            
+            // Draw each arrow
+            moves.forEach(move => {
+                const from = squareToCoords(move.from);
+                const to = squareToCoords(move.to);
+                
+                const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+                line.setAttribute('x1', from.x);
+                line.setAttribute('y1', from.y);
+                line.setAttribute('x2', to.x);
+                line.setAttribute('y2', to.y);
+                line.classList.add('engine-arrow', move.priority || 'primary');
+                
+                svgEl.appendChild(line);
+            });
+        }
+
+        /*
+         * Function to clear all engine visualization
+         * Call this when game ends or when switching games
+         */
+        function clearEngineVisualization() {
+            // Hide evaluations
+            document.getElementById('white-eval').style.display = 'none';
+            document.getElementById('black-eval').style.display = 'none';
+            
+            // Hide best moves
+            document.getElementById('white-best-move').style.display = 'none';
+            document.getElementById('black-best-move').style.display = 'none';
+            
+            // Clear arrows
+            drawEngineArrows([]);
+        }
+
+        /*
+         * WebSocket message handler extension for engine data
+         * Add these cases to your handleMessage() function:
+         * 
+         * case 'engine_eval':
+         *     updateEngineEval(message.color, message.score);
+         *     break;
+         * 
+         * case 'engine_thinking':
+         *     updateBestMove(message.color, message.bestMove, true);
+         *     if (message.topMoves) {
+         *         drawEngineArrows(message.topMoves);
+         *     }
+         *     break;
+         * 
+         * case 'engine_move_made':
+         *     clearEngineVisualization();
+         *     break;
+         */
+    </script>
+</body>
+</html>

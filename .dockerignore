@@ -1,0 +1,52 @@
+# Git
+.git/
+.gitignore
+.gitattributes
+
+# Maven
+target/
+pom.xml.tag
+pom.xml.releaseBackup
+pom.xml.versionsBackup
+
+# IDE
+.vscode/
+.idea/
+*.iml
+.settings/
+.project
+.classpath
+
+# Logs et output
+logs/
+output/
+*.log
+test_output.log
+
+# Docker
+Dockerfile
+docker-compose*.yml
+.dockerignore
+
+# Documentation
+README.md
+LEADERBOARD.md
+*.md
+
+# Tests et configs locaux
+config.test.yml
+config.quick.yml
+config.*.local.yml
+
+# Stats (seront montés en volume)
+stats/
+
+# OS
+.DS_Store
+Thumbs.db
+*~
+
+# Scripts
+deploy.sh
+run.sh
+run-config.sh

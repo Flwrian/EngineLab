@@ -1,0 +1,26 @@
+version: '3.8'
+
+services:
+  enginelab-dev:
+    image: maven:3.9-eclipse-temurin-21
+    container_name: enginelab-dev
+    working_dir: /workspace
+    
+    ports:
+      - "8080:8080"
+    
+    volumes:
+      - .:/workspace
+      - maven-cache:/root/.m2
+    
+    environment:
+      - JAVA_OPTS=-Xmx2g -Xms512m -XX:+UseG1GC
+      - TZ=UTC
+    
+    stdin_open: true
+    tty: true
+    
+    command: /bin/bash
+
+volumes:
+  maven-cache:
