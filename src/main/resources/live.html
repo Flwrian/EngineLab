@@ -83,6 +83,7 @@
             background: #1a1a1a;
             border-bottom: 1px solid #3d3d3d;
             flex-shrink: 0;
+            position: relative;
         }
 
         .sidebar-header h1 {
@@ -90,6 +91,30 @@
             color: #f0d9b5;
             margin-bottom: 8px;
             font-weight: 700;
+        }
+
+        .nav-button {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: #2a2825;
+            border: 1px solid #3d3d3d;
+            color: #999;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 0.85em;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .nav-button:hover {
+            background: #33302c;
+            border-color: #81b64c;
+            color: #f0d9b5;
         }
 
         .sidebar-header .status {
@@ -259,9 +284,9 @@
         #main-content {
             flex: 1;
             display: flex;
-            align-items: flex-start;
+            align-items: center;
             justify-content: center;
-            padding: 20px;
+            padding: 15px;
             overflow-y: auto;
             overflow-x: hidden;
         }
@@ -283,10 +308,10 @@
 
         #board-container {
             width: 100%;
-            max-width: 550px;
+            max-width: 480px;
             display: none;
             margin: 0 auto;
-            padding: 10px 0;
+            padding: 8px 0;
         }
 
         #board-container.visible {
@@ -690,6 +715,10 @@
     <div id="sidebar">
         <div class="sidebar-header">
             <h1>⚡ EngineLab</h1>
+            <a href="/leaderboard" class="nav-button">
+                <span>📊</span>
+                <span>Stats</span>
+            </a>
             <div class="status" id="status">
                 <span class="status-dot"></span>
                 Connecting...

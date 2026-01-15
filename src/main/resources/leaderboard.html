@@ -28,6 +28,31 @@
             text-align: center;
             margin-bottom: 40px;
             padding: 30px 0;
+            position: relative;
+        }
+
+        .nav-button {
+            position: absolute;
+            top: 30px;
+            right: 20px;
+            background: #2a2825;
+            border: 1px solid #3d3d3d;
+            color: #999;
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-size: 0.95em;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .nav-button:hover {
+            background: #33302c;
+            border-color: #81b64c;
+            color: #f0d9b5;
         }
 
         h1 {
@@ -415,6 +440,10 @@
 <body>
     <div class="container">
         <header>
+            <a href="/live" class="nav-button">
+                <span>🎮</span>
+                <span>Live</span>
+            </a>
             <h1>EngineLab</h1>
             <p class="subtitle">Real-time Leaderboard</p>
             <div class="connection-status" id="status">
