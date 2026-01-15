@@ -21,6 +21,51 @@
             display: flex;
         }
 
+        /* Hamburger menu button (mobile only) */
+        #menu-toggle {
+            display: none;
+            position: fixed;
+            top: 15px;
+            left: 15px;
+            z-index: 1001;
+            background: #2a2825;
+            border: 2px solid #3d3d3d;
+            border-radius: 8px;
+            width: 44px;
+            height: 44px;
+            cursor: pointer;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            gap: 5px;
+            transition: all 0.3s ease;
+        }
+
+        #menu-toggle:hover {
+            background: #33302c;
+            border-color: #81b64c;
+        }
+
+        #menu-toggle span {
+            width: 24px;
+            height: 3px;
+            background: #f0d9b5;
+            border-radius: 2px;
+            transition: all 0.3s ease;
+        }
+
+        #menu-toggle.active span:nth-child(1) {
+            transform: rotate(45deg) translate(7px, 7px);
+        }
+
+        #menu-toggle.active span:nth-child(2) {
+            opacity: 0;
+        }
+
+        #menu-toggle.active span:nth-child(3) {
+            transform: rotate(-45deg) translate(6px, -6px);
+        }
+
         /* Sidebar */
         #sidebar {
             width: 320px;
@@ -30,6 +75,7 @@
             flex-direction: column;
             flex-shrink: 0;
             height: 100vh;
+            transition: transform 0.3s ease;
         }
 
         .sidebar-header {
@@ -255,25 +301,34 @@
             justify-content: space-between;
             align-items: center;
             margin-bottom: 8px;
+            gap: 12px;
         }
 
         .player-info {
             display: flex;
             align-items: center;
             gap: 12px;
+            flex: 1;
+            min-width: 0;
         }
 
         .player-details {
-            display: flex;
-            flex-direction: column;
-            gap: 4px;
+            flex: 1;
+            min-width: 0;
+        }
+
+        .player-name-large {
+            font-size: 1em;
+            font-weight: 700;
+            color: #f0d9b5;
+            margin-bottom: 2px;
         }
 
         .player-eval {
-            font-size: 0.85em;
-            font-family: 'Courier New', monospace;
-            font-weight: 700;
+            font-size: 0.75em;
             color: #81b64c;
+            font-weight: 600;
+            font-family: 'Courier New', monospace;
             display: none;
         }
 
@@ -282,7 +337,7 @@
         }
 
         .player-pv {
-            font-size: 0.75em;
+            font-size: 0.7em;
             font-family: 'Courier New', monospace;
             color: #999;
             display: none;
@@ -290,12 +345,17 @@
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
-            max-width: 200px;
         }
 
         .player-pv::before {
             content: "PV: ";
             color: #666;
+        }
+
+        .player-right {
+            display: flex;
+            align-items: center;
+            gap: 10px;
         }
 
         .player-avatar {
@@ -312,12 +372,6 @@
 
         .player-avatar.white {
             background: linear-gradient(135deg, #f0d9b5 0%, #d4c4a8 100%);
-        }
-
-        .player-name-large {
-            font-size: 1em;
-            font-weight: 700;
-            color: #f0d9b5;
         }
 
         .player-clock-large {
@@ -348,7 +402,6 @@
             width: 100%;
             aspect-ratio: 1 / 1;
             position: relative;
-            margin-bottom: 8px;
         }
 
         #board {
@@ -359,7 +412,7 @@
             box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
         }
 
-        /* Arrow overlay for engine suggestions */
+        /* Arrow overlay */
         #board-arrows {
             position: absolute;
             top: 0;
@@ -370,7 +423,6 @@
             z-index: 100;
         }
 
-        /* SVG arrows will be dynamically added here */
         .engine-arrow {
             stroke-width: 7;
             stroke-linecap: round;
@@ -385,31 +437,17 @@
             opacity: 0.9;
         }
 
-        .engine-arrow.secondary {
-            stroke: #ffd700;
-            stroke-width: 7;
-            opacity: 0.7;
-        }
-
-        .engine-arrow.tertiary {
-            stroke: #4a9eff;
-            stroke-width: 6;
-            opacity: 0.6;
-        }
-
         .cg-wrap {
             width: 100%;
             height: 100%;
         }
 
-        /* Damier SVG */
         cg-board {
             background-color: #b58863;
             background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 8 8'%3E%3Crect fill='%23b58863' width='8' height='8'/%3E%3Cpath fill='%23f0d9b5' d='M0 0h1v1H0zM2 0h1v1H2zM4 0h1v1H4zM6 0h1v1H6zM1 1h1v1H1zM3 1h1v1H3zM5 1h1v1H5zM7 1h1v1H7zM0 2h1v1H0zM2 2h1v1H2zM4 2h1v1H4zM6 2h1v1H6zM1 3h1v1H1zM3 3h1v1H3zM5 3h1v1H5zM7 3h1v1H7zM0 4h1v1H0zM2 4h1v1H2zM4 4h1v1H4zM6 4h1v1H6zM1 5h1v1H1zM3 5h1v1H3zM5 5h1v1H5zM7 5h1v1H7zM0 6h1v1H0zM2 6h1v1H2zM4 6h1v1H4zM6 6h1v1H6zM1 7h1v1H1zM3 7h1v1H3zM5 7h1v1H5zM7 7h1v1H7z'/%3E%3C/svg%3E");
             background-size: 100% 100%;
         }
 
-        /* Pièces SVG */
         piece.white.king { background-image: url('/static/pieces/wK.svg'); }
         piece.white.queen { background-image: url('/static/pieces/wQ.svg'); }
         piece.white.rook { background-image: url('/static/pieces/wR.svg'); }
@@ -429,7 +467,6 @@
             background-position: center;
         }
 
-        /* Highlight */
         .cg-wrap square.last-move {
             background-color: rgba(155, 199, 0, 0.41);
         }
@@ -438,56 +475,9 @@
             background-color: rgba(20, 85, 30, 0.5);
         }
 
-        /* Coordinates */
         coords {
             color: #8b8b8b;
             font-weight: 600;
-        }
-
-        /* Moves */
-        .moves-section {
-            background: #2a2825;
-            border-radius: 8px;
-            padding: 10px;
-            max-height: 140px;
-            overflow-y: auto;
-        }
-
-        .moves-section h3 {
-            font-size: 0.9em;
-            color: #999;
-            margin-bottom: 10px;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            font-weight: 600;
-        }
-
-        .moves-list {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(85px, 1fr));
-            gap: 6px;
-        }
-
-        .move-pair {
-            display: flex;
-            gap: 4px;
-            font-family: 'Courier New', monospace;
-            font-size: 0.85em;
-        }
-
-        .move-number {
-            color: #81b64c;
-            font-weight: 700;
-            min-width: 22px;
-        }
-
-        .move-item {
-            background: #1a1a1a;
-            padding: 4px 6px;
-            border-radius: 4px;
-            color: #f0d9b5;
-            flex: 1;
-            text-align: center;
         }
 
         /* Scrollbar */
@@ -508,179 +498,195 @@
             background: #555;
         }
 
-        /* Keyboard shortcuts indicator */
-        .keyboard-hint {
+        /* Mobile overlay */
+        #sidebar-overlay {
+            display: none;
             position: fixed;
-            bottom: 20px;
-            right: 20px;
-            background: rgba(26, 26, 26, 0.95);
-            border: 1px solid #3d3d3d;
-            border-radius: 8px;
-            padding: 12px 16px;
-            color: #999;
-            font-size: 0.8em;
-            backdrop-filter: blur(10px);
-            z-index: 1000;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 999;
             opacity: 0;
-            pointer-events: none;
-            transition: opacity 0.3s;
+            transition: opacity 0.3s ease;
         }
 
-        .keyboard-hint.visible {
+        #sidebar-overlay.active {
             opacity: 1;
         }
 
-        .keyboard-hint kbd {
-            background: #2a2825;
-            border: 1px solid #444;
-            border-radius: 4px;
-            padding: 2px 6px;
-            font-family: monospace;
-            font-size: 0.9em;
-            color: #81b64c;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+        /* Desktop: 1200px+ */
+        @media (max-width: 1200px) {
+            #sidebar {
+                width: 280px;
+            }
         }
 
-        /* Responsive */
-        @media (max-width: 1200px) {
+        /* Tablet: 768px - 900px */
+        @media (max-width: 900px) {
             #sidebar {
                 width: 280px;
             }
             
             #board-container {
-                max-width: 600px;
-            }
-            
-            .player-name-large {
-                font-size: 1em;
-            }
-            
-            .player-clock-large {
-                font-size: 1.3em;
-                padding: 6px 12px;
-                min-width: 70px;
+                max-width: 500px;
             }
         }
 
-        @media (max-width: 900px) {
+        /* Mobile: < 768px */
+        @media (max-width: 768px) {
             body {
                 flex-direction: column;
             }
-            
-            #sidebar {
-                width: 100%;
-                height: auto;
-                max-height: 180px;
-                border-right: none;
-                border-bottom: 1px solid #3d3d3d;
-                overflow-y: auto;
-            }
-            
-            #main-content {
-                height: calc(100vh - 180px);
-                padding: 15px;
-            }
-            
-            #board-container {
-                max-width: 500px;
-            }
-            
-            .sidebar-header {
-                padding: 15px;
-            }
-            
-            .sidebar-header h1 {
-                font-size: 1.4em;
-            }
-            
-            #game-list {
-                padding: 10px;
-            }
-        }
 
-        @media (max-width: 600px) {
+            /* Show hamburger menu */
+            #menu-toggle {
+                display: flex;
+            }
+
+            /* Sidebar becomes overlay */
             #sidebar {
-                max-height: 150px;
+                position: fixed;
+                top: 0;
+                left: 0;
+                height: 100vh;
+                width: 280px;
+                z-index: 1000;
+                transform: translateX(-100%);
             }
-            
+
+            #sidebar.active {
+                transform: translateX(0);
+            }
+
+            #sidebar-overlay {
+                display: block;
+            }
+
+            /* Main content takes full screen */
             #main-content {
-                height: calc(100vh - 150px);
-                padding: 10px;
+                width: 100%;
+                height: 100vh;
+                padding: 70px 10px 10px 10px;
             }
-            
+
             #board-container {
                 max-width: 100%;
+                padding: 0;
             }
-            
-            .sidebar-header {
-                padding: 12px;
+
+            #board-wrapper {
+                width: 100%;
+                max-width: 500px;
+                margin: 0 auto;
             }
-            
-            .sidebar-header h1 {
-                font-size: 1.2em;
-            }
-            
-            .game-item {
-                padding: 10px;
-                font-size: 0.9em;
-            }
-            
+
             .player-bar {
-                padding: 10px 12px;
-                margin-bottom: 8px;
+                padding: 8px 10px;
+                gap: 8px;
             }
-            
+
             .player-avatar {
                 width: 32px;
                 height: 32px;
                 font-size: 1.2em;
             }
-            
+
             .player-name-large {
                 font-size: 0.9em;
             }
-            
+
+            .player-eval {
+                font-size: 0.7em;
+            }
+
+            .player-pv {
+                font-size: 0.65em;
+            }
+
             .player-clock-large {
                 font-size: 1.1em;
-                padding: 6px 10px;
-                min-width: 60px;
+                padding: 5px 10px;
+                min-width: 65px;
             }
-            
-            .moves-section {
+
+            .sidebar-header {
+                padding: 15px;
+            }
+
+            .sidebar-header h1 {
+                font-size: 1.4em;
+            }
+
+            .game-item {
                 padding: 10px;
-                max-height: 120px;
             }
-            
-            .moves-section h3 {
-                font-size: 0.8em;
+
+            #no-games h2 {
+                font-size: 1.5em;
             }
-            
-            .moves-list {
-                grid-template-columns: repeat(auto-fill, minmax(75px, 1fr));
-                gap: 4px;
-            }
-            
-            .move-pair {
-                font-size: 0.75em;
+
+            #no-games p {
+                font-size: 1em;
             }
         }
 
-        @media (max-height: 700px) {
-            .moves-section {
-                max-height: 100px;
+        /* Small mobile: < 400px */
+        @media (max-width: 400px) {
+            #menu-toggle {
+                width: 40px;
+                height: 40px;
+                top: 12px;
+                left: 12px;
             }
-            
+
+            #menu-toggle span {
+                width: 20px;
+                height: 2px;
+            }
+
+            #main-content {
+                padding: 65px 8px 8px 8px;
+            }
+
+            #sidebar {
+                width: 260px;
+            }
+
             .player-bar {
-                padding: 8px 12px;
+                padding: 6px 8px;
             }
-            
+
+            .player-avatar {
+                width: 28px;
+                height: 28px;
+                font-size: 1em;
+            }
+
+            .player-name-large {
+                font-size: 0.85em;
+            }
+
             .player-clock-large {
-                font-size: 1.2em;
+                font-size: 1em;
+                padding: 4px 8px;
+                min-width: 60px;
             }
         }
     </style>
 </head>
 <body>
+    <!-- Mobile menu toggle -->
+    <div id="menu-toggle">
+        <span></span>
+        <span></span>
+        <span></span>
+    </div>
+
+    <!-- Sidebar overlay for mobile -->
+    <div id="sidebar-overlay"></div>
+
     <div id="sidebar">
         <div class="sidebar-header">
             <h1>⚡ EngineLab</h1>
@@ -704,9 +710,7 @@
                     <div class="player-avatar">♚</div>
                     <div class="player-details">
                         <div class="player-name-large" id="black-name">Black</div>
-                        <!-- Engine evaluation score (hidden by default) -->
                         <div class="player-eval" id="black-eval">+0.00</div>
-                        <!-- Principal Variation -->
                         <div class="player-pv" id="black-pv"></div>
                     </div>
                 </div>
@@ -717,7 +721,6 @@
             
             <div id="board-wrapper">
                 <div id="board"></div>
-                <!-- SVG overlay for arrows -->
                 <svg id="board-arrows">
                     <defs>
                         <marker id="arrowhead" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto" markerUnits="strokeWidth">
@@ -732,9 +735,7 @@
                     <div class="player-avatar white">♔</div>
                     <div class="player-details">
                         <div class="player-name-large" id="white-name">White</div>
-                        <!-- Engine evaluation score (hidden by default) -->
                         <div class="player-eval" id="white-eval">+0.00</div>
-                        <!-- Principal Variation -->
                         <div class="player-pv" id="white-pv"></div>
                     </div>
                 </div>
@@ -742,17 +743,7 @@
                     <div class="player-clock-large" id="white-clock">--:--</div>
                 </div>
             </div>
-            
-            <div class="moves-section">
-                <h3>Move History</h3>
-                <div class="moves-list" id="moves-list"></div>
-            </div>
         </div>
-    </div>
-
-    <!-- Keyboard shortcuts hint -->
-    <div class="keyboard-hint" id="keyboard-hint">
-        <kbd>Tab</kbd> Next game &nbsp;|&nbsp; <kbd>Shift+Tab</kbd> Previous game &nbsp;|&nbsp; <kbd>?</kbd> Toggle help
     </div>
 
     <script src="/static/chessground.js"></script>
@@ -765,11 +756,36 @@
         let clockInterval = null;
         let archivedCollapsed = false;
 
+        // Mobile menu toggle
+        const menuToggle = document.getElementById('menu-toggle');
+        const sidebar = document.getElementById('sidebar');
+        const sidebarOverlay = document.getElementById('sidebar-overlay');
+
+        menuToggle.addEventListener('click', () => {
+            menuToggle.classList.toggle('active');
+            sidebar.classList.toggle('active');
+            sidebarOverlay.classList.toggle('active');
+        });
+
+        sidebarOverlay.addEventListener('click', () => {
+            menuToggle.classList.remove('active');
+            sidebar.classList.remove('active');
+            sidebarOverlay.classList.remove('active');
+        });
+
+        // Close menu when selecting a game on mobile
+        function closeMobileMenu() {
+            if (window.innerWidth <= 768) {
+                menuToggle.classList.remove('active');
+                sidebar.classList.remove('active');
+                sidebarOverlay.classList.remove('active');
+            }
+        }
+
         // Initialize Chessground
         if (typeof Chessground !== 'undefined' && typeof Chessground.Chessground === 'function') {
             console.log('✅ Chessground loaded successfully');
             const boardElement = document.getElementById('board');
-            console.log('📦 Board element:', boardElement);
             board = Chessground.Chessground(boardElement, {
                 coordinates: true,
                 viewOnly: true,
@@ -782,80 +798,8 @@
                     check: true
                 }
             });
-            console.log('♟️ Chessground instance created:', board);
         } else {
             console.error('❌ Failed to load Chessground library');
-        }
-
-        // Keyboard shortcuts
-        document.addEventListener('keydown', (e) => {
-            // Ignore if typing in input
-            if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
-            
-            if (e.key === 'Tab') {
-                e.preventDefault();
-                if (e.shiftKey) {
-                    switchToPreviousGame();
-                } else {
-                    switchToNextGame();
-                }
-            } else if (e.key === '?') {
-                toggleKeyboardHint();
-            }
-        });
-
-        function getActiveGameIds() {
-            const activeGames = [];
-            for (const [gameId, game] of games) {
-                if (game.status === 'running') {
-                    activeGames.push(gameId);
-                }
-            }
-            return activeGames.sort((a, b) => a - b);
-        }
-
-        function switchToNextGame() {
-            const activeGames = getActiveGameIds();
-            if (activeGames.length === 0) return;
-            
-            const currentIndex = activeGames.indexOf(currentGameId);
-            const nextIndex = (currentIndex + 1) % activeGames.length;
-            showGame(activeGames[nextIndex]);
-            
-            // Flash keyboard hint
-            showKeyboardHint();
-        }
-
-        function switchToPreviousGame() {
-            const activeGames = getActiveGameIds();
-            if (activeGames.length === 0) return;
-            
-            const currentIndex = activeGames.indexOf(currentGameId);
-            const prevIndex = currentIndex <= 0 ? activeGames.length - 1 : currentIndex - 1;
-            showGame(activeGames[prevIndex]);
-            
-            // Flash keyboard hint
-            showKeyboardHint();
-        }
-
-        let keyboardHintTimeout;
-        function showKeyboardHint() {
-            const hint = document.getElementById('keyboard-hint');
-            hint.classList.add('visible');
-            
-            clearTimeout(keyboardHintTimeout);
-            keyboardHintTimeout = setTimeout(() => {
-                hint.classList.remove('visible');
-            }, 2000);
-        }
-
-        function toggleKeyboardHint() {
-            const hint = document.getElementById('keyboard-hint');
-            hint.classList.toggle('visible');
-            
-            if (hint.classList.contains('visible')) {
-                clearTimeout(keyboardHintTimeout);
-            }
         }
 
         function connectWebSocket() {
@@ -892,7 +836,7 @@
             ws.onmessage = (event) => {
                 try {
                     const message = JSON.parse(event.data);
-                    console.log('📨 Message received:', message.type, message);
+                    console.log('📨 Message received:', message.type);
                     handleMessage(message);
                 } catch (e) {
                     console.error('Failed to parse WebSocket message:', e);
@@ -917,42 +861,23 @@
                 case 'game_end':
                     handleGameEnd(message);
                     break;
-                case 'server_shutdown':
-                    console.log('🛑 Server shutting down:', message.message);
-                    const statusEl = document.getElementById('status');
-                    statusEl.innerHTML = '<span class="status-dot"></span>Server stopped (refresh to reconnect)';
-                    statusEl.className = 'status';
-                    break;
             }
         }
 
         function handleGameStart(data) {
             const gameId = data.gameId;
-            console.log(`🎮 Game ${gameId} started`, data);
+            console.log(`🎮 Game ${gameId} started`);
             
-            // Check if we already have this game (reconnection scenario)
-            const existingGame = games.get(gameId);
-            
-            // Parse moves array if it's a JSON array
             let moves = [];
             if (data.moves) {
-                if (Array.isArray(data.moves)) {
-                    moves = data.moves;
-                } else if (data.moves.length) {
-                    // It might be an array-like object
-                    moves = Array.from(data.moves);
-                }
-                console.log('📥 Received moves:', moves.length, moves);
+                moves = Array.isArray(data.moves) ? data.moves : Array.from(data.moves);
             }
-            
-            const fen = data.fen || 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1';
-            console.log('🎯 Received FEN:', fen);
             
             games.set(gameId, {
                 white: data.white || 'Engine White',
                 black: data.black || 'Engine Black',
-                moves: moves.length > 0 ? moves : (existingGame?.moves || []),
-                fen: fen,
+                moves: moves,
+                fen: data.fen || 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
                 whiteTime: data.whiteTime || 0,
                 blackTime: data.blackTime || 0,
                 status: 'running',
@@ -965,16 +890,10 @@
                 lastUpdateTime: Date.now()
             });
 
-            console.log('💾 Game stored:', games.get(gameId));
-
             updateGameList();
             
-            if (currentGameId === null || currentGameId === undefined) {
-                console.log('🎯 Showing game', gameId, 'as first game');
+            if (!currentGameId) {
                 showGame(gameId);
-            } else if (currentGameId === gameId) {
-                console.log('🔄 Updating already watched game', gameId);
-                updateBoard();
             }
         }
 
@@ -986,9 +905,8 @@
             game.fen = data.fen;
             game.whiteTime = data.whiteTime || game.whiteTime;
             game.blackTime = data.blackTime || game.blackTime;
-            game.lastUpdateTime = Date.now(); // Reset timer on move
+            game.lastUpdateTime = Date.now();
             
-            // Store evaluation data if present
             if (data.whiteScore !== undefined) game.whiteScore = data.whiteScore;
             if (data.blackScore !== undefined) game.blackScore = data.blackScore;
             if (data.whiteDepth !== undefined) game.whiteDepth = data.whiteDepth;
@@ -999,7 +917,6 @@
             if (currentGameId === data.gameId) {
                 updateBoard();
                 
-                // Update evaluations if available
                 if (game.whiteScore !== undefined) {
                     updateEngineEval('white', game.whiteScore, game.whiteDepth);
                     updatePv('white', game.whitePv);
@@ -1009,7 +926,6 @@
                     updatePv('black', game.blackPv);
                 }
                 
-                // Draw arrows for the PV of the side to move
                 const isWhiteTurn = game.fen.split(' ')[1] === 'w';
                 const pv = isWhiteTurn ? game.whitePv : game.blackPv;
                 if (pv) {
@@ -1017,38 +933,22 @@
                 }
             }
             
-            // Only update clocks in sidebar, not the whole list
             updateGameClocks();
         }
 
         function handleEngineThinking(data) {
-            console.log('🧠 handleEngineThinking:', data);
-            
-            // Only update if we're watching this game
-            if (currentGameId !== data.gameId) {
-                console.log('⏭️ Skipping: not watching this game');
-                return;
-            }
+            if (currentGameId !== data.gameId) return;
             
             const game = games.get(data.gameId);
-            if (!game) {
-                console.log('⚠️ Game not found:', data.gameId);
-                return;
-            }
+            if (!game) return;
             
-            // Update evaluation display
             const color = data.isWhite ? 'white' : 'black';
             if (data.score !== undefined) {
-                console.log(`📊 Updating ${color} eval:`, data.score, 'depth:', data.depth);
                 updateEngineEval(color, data.score, data.depth);
             }
             
-            // Update PV display
             if (data.pv) {
-                console.log(`📝 Updating ${color} PV:`, data.pv);
                 updatePv(color, data.pv);
-                
-                // Draw arrow for first PV move in real-time
                 drawPvArrows(data.pv, game.fen);
             }
         }
@@ -1061,37 +961,35 @@
             game.result = data.result;
             game.reason = data.reason;
             
-            console.log(`🏁 Game ${data.gameId} ended:`, data.result, data.reason);
-            
-            // Stop clock timer if this is the current game
             if (currentGameId === data.gameId) {
-                console.log('⏱️ Stopping clock for finished game', data.gameId);
                 if (clockInterval) {
                     clearInterval(clockInterval);
                     clockInterval = null;
                 }
             }
             
-            // Update list first to reflect the change
             updateGameList();
             
-            // Auto-switch to an active game if current game ended
             if (currentGameId === data.gameId) {
                 updateBoard();
                 
-                // Wait a bit for everything to update, then find next active game
                 setTimeout(() => {
                     const activeGames = getActiveGameIds();
-                    console.log('🔍 Looking for active games:', activeGames);
-                    
                     if (activeGames.length > 0) {
-                        console.log('🔄 Switching to next active game:', activeGames[0]);
                         showGame(activeGames[0]);
-                    } else {
-                        console.log('ℹ️ No more active games');
                     }
-                }, 2000); // 2 seconds delay to show final state
+                }, 2000);
             }
+        }
+
+        function getActiveGameIds() {
+            const activeGames = [];
+            for (const [gameId, game] of games) {
+                if (game.status === 'running') {
+                    activeGames.push(gameId);
+                }
+            }
+            return activeGames.sort((a, b) => a - b);
         }
 
         function updateGameList() {
@@ -1106,7 +1004,6 @@
 
             document.getElementById('no-games').style.display = 'none';
 
-            // Separate active and archived games
             const activeGames = [];
             const archivedGames = [];
             
@@ -1118,17 +1015,14 @@
                 }
             }
 
-            // Sort by game ID
             activeGames.sort((a, b) => a[0] - b[0]);
-            archivedGames.sort((a, b) => b[0] - a[0]); // Reverse order for archived
+            archivedGames.sort((a, b) => b[0] - a[0]);
 
-            // Active games section
             if (activeGames.length > 0) {
                 const activeSection = createGameSection('🔴 Live Games', activeGames, false);
                 container.appendChild(activeSection);
             }
 
-            // Archived games section
             if (archivedGames.length > 0) {
                 const archivedSection = createGameSection('📁 Archived Games', archivedGames, archivedCollapsed);
                 container.appendChild(archivedSection);
@@ -1139,7 +1033,6 @@
             const section = document.createElement('div');
             section.className = 'game-section';
 
-            // Section header
             const header = document.createElement('div');
             header.className = 'section-header';
             header.onclick = () => {
@@ -1148,7 +1041,6 @@
                 gamesContainer.classList.toggle('collapsed');
                 toggle.classList.toggle('collapsed');
                 
-                // Remember state for archived section
                 if (title.includes('Archived')) {
                     archivedCollapsed = gamesContainer.classList.contains('collapsed');
                 }
@@ -1164,7 +1056,6 @@
 
             section.appendChild(header);
 
-            // Games container
             const gamesContainer = document.createElement('div');
             gamesContainer.className = 'section-games' + (collapsed ? ' collapsed' : '');
 
@@ -1172,7 +1063,10 @@
                 const item = document.createElement('div');
                 item.className = 'game-item' + (currentGameId === gameId ? ' active' : '');
                 item.setAttribute('data-game-id', gameId);
-                item.onclick = () => showGame(gameId);
+                item.onclick = () => {
+                    showGame(gameId);
+                    closeMobileMenu();
+                };
 
                 const statusClass = game.status === 'running' ? 'live' : 'finished';
                 const statusText = game.status === 'running' ? 'Live' : (game.result || 'Finished');
@@ -1206,7 +1100,6 @@
         }
 
         function updateGameClocks() {
-            // Update only the clock displays in the sidebar without recreating DOM
             for (const [gameId, game] of games) {
                 const gameItem = document.querySelector(`.game-item[data-game-id="${gameId}"]`);
                 if (gameItem) {
@@ -1222,90 +1115,31 @@
         }
 
         function showGame(gameId) {
-            console.log('🎬 showGame called for', gameId);
             currentGameId = gameId;
             updateGameList();
             updateBoard();
             document.getElementById('board-container').classList.add('visible');
-            console.log('✅ Board container made visible');
         }
 
         function updateBoard() {
-            console.log('🔧 updateBoard called, currentGameId:', currentGameId, 'board:', board, 'board type:', typeof board);
-            
-            if (currentGameId === null || currentGameId === undefined) {
-                console.warn('⚠️ Cannot update board: currentGameId is null');
-                return;
-            }
-            
-            if (!board) {
-                console.warn('⚠️ Cannot update board: board is null');
-                return;
-            }
+            if (!currentGameId || !board) return;
 
             const game = games.get(currentGameId);
-            if (!game) {
-                console.warn('⚠️ Cannot update board: game not found for id', currentGameId);
-                return;
-            }
+            if (!game) return;
 
-            console.log('📊 Updating board:', {
-                gameId: currentGameId,
-                fen: game.fen,
-                movesCount: game.moves.length,
-                lastMoves: game.moves.slice(-3)
-            });
-
-            // Update Chessground board
             const lastMove = game.moves.length > 0 ? game.moves[game.moves.length - 1] : null;
             
-            const boardConfig = {
+            board.set({
                 fen: game.fen,
                 lastMove: lastMove && lastMove.length >= 4 ? 
                     [lastMove.substring(0, 2), lastMove.substring(2, 4)] : undefined
-            };
-            
-            console.log('🎯 Chessground config:', boardConfig);
-            board.set(boardConfig);
-            console.log('✅ Board updated successfully');
+            });
 
-            // Update player names
             document.getElementById('white-name').textContent = game.white;
             document.getElementById('black-name').textContent = game.black;
 
-            // Update clocks initially
             updateClockDisplay();
 
-            // Update move list
-            const movesList = document.getElementById('moves-list');
-            movesList.innerHTML = '';
-            
-            for (let i = 0; i < game.moves.length; i += 2) {
-                const moveNumber = Math.floor(i / 2) + 1;
-                const whiteMove = game.moves[i];
-                const blackMove = game.moves[i + 1];
-                
-                const pairDiv = document.createElement('div');
-                pairDiv.className = 'move-pair';
-                
-                pairDiv.innerHTML = `
-                    <span class="move-number">${moveNumber}.</span>
-                    <span class="move-item">${whiteMove}</span>
-                    ${blackMove ? `<span class="move-item">${blackMove}</span>` : ''}
-                `;
-                
-                movesList.appendChild(pairDiv);
-            }
-
-            // Show game result if finished
-            if (game.status === 'finished') {
-                const resultDiv = document.createElement('div');
-                resultDiv.style.cssText = 'margin-top: 12px; padding: 10px; background: #1a1a1a; border-radius: 6px; text-align: center; color: #81b64c; font-weight: 700;';
-                resultDiv.textContent = `Game Over: ${game.result} (${game.reason})`;
-                movesList.appendChild(resultDiv);
-            }
-
-            // Update evaluations if available
             if (game.whiteScore !== undefined) {
                 updateEngineEval('white', game.whiteScore, game.whiteDepth);
                 updatePv('white', game.whitePv);
@@ -1315,17 +1149,12 @@
                 updatePv('black', game.blackPv);
             }
             
-            // Draw arrows for the PV of the side to move
             const isWhiteTurn = game.fen.split(' ')[1] === 'w';
             const pv = isWhiteTurn ? game.whitePv : game.blackPv;
             if (pv) {
                 drawPvArrows(pv, game.fen);
             }
-
-            // Auto-scroll to bottom
-            movesList.scrollTop = movesList.scrollHeight;
             
-            // Start clock update timer
             startClockTimer();
         }
 
@@ -1336,9 +1165,8 @@
             const minutes = Math.floor(totalSeconds / 60);
             const seconds = totalSeconds % 60;
             
-            // Show milliseconds if time is less than 10 seconds and showMs is true
             if (showMs && ms < 10000) {
-                const milliseconds = Math.floor((ms % 1000) / 10); // Show centiseconds
+                const milliseconds = Math.floor((ms % 1000) / 10);
                 return `${seconds}.${milliseconds.toString().padStart(2, '0')}`;
             }
             
@@ -1346,26 +1174,16 @@
         }
 
         function startClockTimer() {
-            // Clear existing interval
             if (clockInterval) {
                 clearInterval(clockInterval);
                 clockInterval = null;
-                console.log('⏱️ Cleared previous clock timer');
             }
             
-            // Don't start timer if game is finished
             const game = games.get(currentGameId);
-            if (!game || game.status !== 'running') {
-                console.log('⏱️ Not starting timer - game not running');
-                return;
-            }
+            if (!game || game.status !== 'running') return;
             
-            console.log('⏱️ Starting clock timer for game', currentGameId);
-            
-            // Update clocks every 100ms for smooth countdown
             clockInterval = setInterval(() => {
-                if (currentGameId === null || currentGameId === undefined) {
-                    console.log('⏱️ Stopping timer - no current game');
+                if (!currentGameId) {
                     clearInterval(clockInterval);
                     clockInterval = null;
                     return;
@@ -1373,16 +1191,13 @@
                 
                 const game = games.get(currentGameId);
                 if (!game || game.status !== 'running') {
-                    console.log('⏱️ Stopping timer - game finished or not found');
                     clearInterval(clockInterval);
                     clockInterval = null;
                     return;
                 }
                 
-                // Determine whose turn it is
                 const isWhiteTurn = game.fen.split(' ')[1] === 'w';
                 
-                // Decrease time for the player whose turn it is
                 const now = Date.now();
                 if (!game.lastUpdateTime) {
                     game.lastUpdateTime = now;
@@ -1398,14 +1213,12 @@
                     game.blackTime = Math.max(0, game.blackTime - elapsed);
                 }
                 
-                // Update clock display
                 updateClockDisplay();
-                
             }, 100);
         }
 
         function updateClockDisplay() {
-            if (currentGameId === null || currentGameId === undefined) return;
+            if (!currentGameId) return;
             
             const game = games.get(currentGameId);
             if (!game) return;
@@ -1413,55 +1226,30 @@
             const whiteClockEl = document.getElementById('white-clock');
             const blackClockEl = document.getElementById('black-clock');
             
-            // Show milliseconds if time is low (< 10 seconds)
             const showWhiteMs = game.whiteTime < 10000;
             const showBlackMs = game.blackTime < 10000;
             
             whiteClockEl.textContent = formatTime(game.whiteTime, showWhiteMs);
             blackClockEl.textContent = formatTime(game.blackTime, showBlackMs);
             
-            // Low time warning (less than 10 seconds)
             whiteClockEl.className = 'player-clock-large' + (game.whiteTime < 10000 ? ' low-time' : '');
             blackClockEl.className = 'player-clock-large' + (game.blackTime < 10000 ? ' low-time' : '');
         }
 
-        // Connect on page load
-        connectWebSocket();
-
-        // ============================================
-        // ENGINE EVALUATION FUNCTIONS
-        // ============================================
-        
-        /**
-         * Function to update engine evaluation score
-         * Call this when receiving engine analysis from WebSocket
-         * 
-         * @param {string} color - 'white' or 'black'
-         * @param {number} score - Centipawn score (e.g., 50 = +0.50) or mate score
-         * @param {number} depth - Search depth (optional)
-         * 
-         * Example usage:
-         * updateEngineEval('white', 50, 12);  // +0.50 at depth 12
-         * updateEngineEval('black', -25, 15); // -0.25 at depth 15
-         * updateEngineEval('white', 9800, 8); // M2 at depth 8
-         */
         function updateEngineEval(color, score, depth) {
             const evalEl = document.getElementById(`${color}-eval`);
             if (!evalEl) return;
             
             let displayScore;
             
-            // Check for mate scores (>= 9000 centipawns)
             if (Math.abs(score) >= 9000) {
                 const mateIn = Math.ceil((10000 - Math.abs(score)) / 100);
                 displayScore = score >= 0 ? `M${mateIn}` : `-M${mateIn}`;
             } else {
-                // Regular centipawn score
                 const scoreValue = (score / 100).toFixed(2);
                 displayScore = score >= 0 ? `+${scoreValue}` : scoreValue;
             }
             
-            // Add depth info if available
             if (depth !== undefined && depth !== null) {
                 displayScore += ` (d${depth})`;
             }
@@ -1471,9 +1259,6 @@
             evalEl.style.display = 'block';
         }
 
-        /**
-         * Update the principal variation display
-         */
         function updatePv(color, pv) {
             const pvEl = document.getElementById(`${color}-pv`);
             if (!pvEl) return;
@@ -1486,35 +1271,19 @@
             }
         }
 
-        /**
-         * Draw arrow for the first move in the PV
-         */
         function drawPvArrows(pv, fen) {
-            console.log('🎯 drawPvArrows called:', { pv, fen });
-            
             const svgEl = document.getElementById('board-arrows');
-            if (!svgEl) {
-                console.error('❌ SVG element not found');
+            if (!svgEl || !pv) {
+                if (svgEl) svgEl.style.display = 'none';
                 return;
             }
             
-            if (!pv) {
-                console.log('⚠️ No PV provided');
-                svgEl.style.display = 'none';
-                return;
-            }
-            
-            // Clear existing arrows
             const arrows = svgEl.querySelectorAll('.engine-arrow');
-            console.log('🗑️ Clearing', arrows.length, 'existing arrows');
             arrows.forEach(arrow => arrow.remove());
             
-            // Get first move from PV
             const moves = pv.trim().split(/\s+/);
-            console.log('📋 PV moves:', moves);
             
             if (moves.length === 0 || moves[0].length < 4) {
-                console.log('⚠️ Invalid first move:', moves[0]);
                 svgEl.style.display = 'none';
                 return;
             }
@@ -1522,40 +1291,29 @@
             const move = moves[0];
             const from = move.substring(0, 2);
             const to = move.substring(2, 4);
-            console.log('➡️ Drawing arrow from', from, 'to', to);
             
-            // Get board dimensions from the wrapper
             const boardWrapper = document.getElementById('board-wrapper');
-            if (!boardWrapper) {
-                console.error('❌ Board wrapper not found');
-                return;
-            }
+            if (!boardWrapper) return;
             
             const boardRect = boardWrapper.getBoundingClientRect();
             const squareSize = boardRect.width / 8;
-            console.log('📏 Board dimensions:', { width: boardRect.width, squareSize });
             
-            // Helper to convert square notation to coordinates
             const squareToCoords = (square) => {
-                const file = square.charCodeAt(0) - 97; // a=0, b=1, etc.
-                const rank = 8 - parseInt(square[1]); // 8=0, 7=1, etc.
-                const coords = {
+                const file = square.charCodeAt(0) - 97;
+                const rank = 8 - parseInt(square[1]);
+                return {
                     x: (file + 0.5) * squareSize,
                     y: (rank + 0.5) * squareSize
                 };
-                console.log(`📍 ${square} -> (${coords.x}, ${coords.y})`);
-                return coords;
             };
             
             const fromCoords = squareToCoords(from);
             const toCoords = squareToCoords(to);
             
-            // Calculate direction vector
             const dx = toCoords.x - fromCoords.x;
             const dy = toCoords.y - fromCoords.y;
             const length = Math.sqrt(dx * dx + dy * dy);
             
-            // Normalize and shorten the arrow (start 20% from center, end 20% before center)
             const startOffset = squareSize * 0.20;
             const endOffset = squareSize * 0.20;
             
@@ -1564,7 +1322,6 @@
             const endX = toCoords.x - (dx / length) * endOffset;
             const endY = toCoords.y - (dy / length) * endOffset;
             
-            // Draw arrow
             const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
             line.setAttribute('x1', startX);
             line.setAttribute('y1', startY);
@@ -1574,125 +1331,9 @@
             
             svgEl.appendChild(line);
             svgEl.style.display = 'block';
-            
-            console.log('✅ Arrow drawn successfully');
         }
 
-        /*
-         * Function to update best move suggestion
-         * Call this when engine suggests a move
-         * 
-         * @param {string} color - 'white' or 'black'
-         * @param {string} move - UCI move notation (e.g., 'e2e4')
-         * @param {boolean} thinking - Whether engine is currently thinking
-         * 
-         * Example usage:
-         * updateBestMove('white', 'e2e4', true);
-         */
-        function updateBestMove(color, move, thinking = false) {
-            const moveEl = document.getElementById(`${color}-best-move`);
-            if (!moveEl) return;
-            
-            moveEl.textContent = move || '...';
-            moveEl.className = 'best-move-indicator' + (thinking ? ' thinking' : '');
-            moveEl.style.display = move ? 'block' : 'none';
-        }
-
-        /*
-         * Function to draw arrows on the board
-         * Call this to show engine's top move suggestions
-         * 
-         * @param {Array} moves - Array of move objects
-         *   Each move: { from: 'e2', to: 'e4', priority: 'primary'|'secondary'|'tertiary' }
-         * 
-         * Example usage:
-         * drawEngineArrows([
-         *   { from: 'e2', to: 'e4', priority: 'primary' },
-         *   { from: 'g1', to: 'f3', priority: 'secondary' }
-         * ]);
-         */
-        function drawEngineArrows(moves) {
-            const svgEl = document.getElementById('board-arrows');
-            if (!svgEl) return;
-            
-            // Clear existing arrows
-            const arrows = svgEl.querySelectorAll('.engine-arrow');
-            arrows.forEach(arrow => arrow.remove());
-            
-            if (!moves || moves.length === 0) {
-                svgEl.style.display = 'none';
-                return;
-            }
-            
-            svgEl.style.display = 'block';
-            
-            // Get board dimensions
-            const boardEl = document.getElementById('board');
-            const boardRect = boardEl.getBoundingClientRect();
-            const squareSize = boardRect.width / 8;
-            
-            // Helper to convert square notation to coordinates
-            const squareToCoords = (square) => {
-                const file = square.charCodeAt(0) - 97; // a=0, b=1, etc.
-                const rank = 8 - parseInt(square[1]); // 8=0, 7=1, etc.
-                return {
-                    x: (file + 0.5) * squareSize,
-                    y: (rank + 0.5) * squareSize
-                };
-            };
-            
-            // Draw each arrow
-            moves.forEach(move => {
-                const from = squareToCoords(move.from);
-                const to = squareToCoords(move.to);
-                
-                const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
-                line.setAttribute('x1', from.x);
-                line.setAttribute('y1', from.y);
-                line.setAttribute('x2', to.x);
-                line.setAttribute('y2', to.y);
-                line.classList.add('engine-arrow', move.priority || 'primary');
-                
-                svgEl.appendChild(line);
-            });
-        }
-
-        /*
-         * Function to clear all engine visualization
-         * Call this when game ends or when switching games
-         */
-        function clearEngineVisualization() {
-            // Hide evaluations
-            document.getElementById('white-eval').style.display = 'none';
-            document.getElementById('black-eval').style.display = 'none';
-            
-            // Hide best moves
-            document.getElementById('white-best-move').style.display = 'none';
-            document.getElementById('black-best-move').style.display = 'none';
-            
-            // Clear arrows
-            drawEngineArrows([]);
-        }
-
-        /*
-         * WebSocket message handler extension for engine data
-         * Add these cases to your handleMessage() function:
-         * 
-         * case 'engine_eval':
-         *     updateEngineEval(message.color, message.score);
-         *     break;
-         * 
-         * case 'engine_thinking':
-         *     updateBestMove(message.color, message.bestMove, true);
-         *     if (message.topMoves) {
-         *         drawEngineArrows(message.topMoves);
-         *     }
-         *     break;
-         * 
-         * case 'engine_move_made':
-         *     clearEngineVisualization();
-         *     break;
-         */
+        connectWebSocket();
     </script>
 </body>
 </html>

@@ -14,8 +14,9 @@ echo "Starting EngineLab in dev mode..."
 echo "You can:"
 echo "  - Edit files on your host, they're synced in real-time"
 echo "  - Run ./run.sh inside the container"
-echo "  - Maven cache is persisted between runs"
 echo ""
 
-docker compose -f docker-compose.dev.yml up -d
-docker compose -f docker-compose.dev.yml exec enginelab-dev bash
+mvn clean package -DskipTests
+
+docker compose -f docker-compose.yml up -d
+docker compose -f docker-compose.yml exec enginelab-dev bash
