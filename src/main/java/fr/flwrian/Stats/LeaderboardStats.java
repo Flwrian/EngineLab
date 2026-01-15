@@ -4,12 +4,12 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * Statistiques du leaderboard par moteur et time control
+ * Leaderboard statistics by engine and time control
  */
 public class LeaderboardStats {
     
     /**
-     * Statistiques pour un moteur spécifique
+     * Statistics for a specific engine
      */
     public static class EngineStats {
         private String engineName;
@@ -91,7 +91,7 @@ public class LeaderboardStats {
     }
     
     /**
-     * Statistiques pour un time control spécifique
+     * Statistics for a specific time control
      */
     public static class TimeControlStats {
         private String timeControl;
@@ -142,7 +142,7 @@ public class LeaderboardStats {
     }
     
     /**
-     * Enregistre le résultat d'une partie
+     * Records game result
      */
     public void recordGameResult(String whiteEngine, String blackEngine, String result, String timeControl) {
         EngineStats whiteStats = getOrCreateEngineStats(whiteEngine);
@@ -169,7 +169,7 @@ public class LeaderboardStats {
     }
     
     /**
-     * Retourne les statistiques triées par points
+     * Returns statistics sorted by points
      */
     public List<EngineStats> getLeaderboard() {
         List<EngineStats> leaderboard = new ArrayList<>(engineStats.values());
@@ -201,7 +201,7 @@ public class LeaderboardStats {
     }
     
     /**
-     * Fusionne les statistiques d'une autre instance
+     * Merges statistics from another instance
      */
     public void merge(LeaderboardStats other) {
         for (Map.Entry<String, EngineStats> entry : other.engineStats.entrySet()) {

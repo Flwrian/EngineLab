@@ -18,37 +18,37 @@ public class Engine {
     public Engine(String path) throws Exception {
         this.enginePath = path;
         
-        // Vérifications détaillées du fichier engine
+        // Detailed engine file verification
         File engineFile = new File(path);
-        System.out.println("[Engine] Initialisation de l'engine: " + path);
-        System.out.println("  ├─ Chemin absolu: " + engineFile.getAbsolutePath());
-        System.out.println("  ├─ Existe: " + engineFile.exists());
-        System.out.println("  ├─ Est un fichier: " + engineFile.isFile());
-        System.out.println("  ├─ Peut être lu: " + engineFile.canRead());
-        System.out.println("  ├─ Peut être exécuté: " + engineFile.canExecute());
-        System.out.println("  └─ Taille: " + engineFile.length() + " octets");
+        System.out.println("[Engine] Initializing engine: " + path);
+        System.out.println("  ├─ Absolute path: " + engineFile.getAbsolutePath());
+        System.out.println("  ├─ Exists: " + engineFile.exists());
+        System.out.println("  ├─ Is file: " + engineFile.isFile());
+        System.out.println("  ├─ Can read: " + engineFile.canRead());
+        System.out.println("  ├─ Can execute: " + engineFile.canExecute());
+        System.out.println("  └─ Size: " + engineFile.length() + " bytes");
         
         if (!engineFile.exists()) {
-            throw new Exception("Engine introuvable: " + path);
+            throw new Exception("Engine not found: " + path);
         }
         
         if (!engineFile.canExecute()) {
-            System.err.println("Engine n'est pas exécutable: " + path);
-            System.err.println("   Tentative de rendre exécutable...");
+            System.err.println("Engine is not executable: " + path);
+            System.err.println("   Attempting to make executable...");
             engineFile.setExecutable(true);
         }
         
-        System.out.println("[Engine] Démarrage du processus...");
+        System.out.println("[Engine] Starting process...");
         process = new ProcessBuilder(path).start();
         
         if (!process.isAlive()) {
-            throw new Exception("Le processus engine n'a pas démarré correctement");
+            throw new Exception("Engine process failed to start properly");
         }
         
-        System.out.println("[Engine] Processus démarré (PID: " + process.pid() + ")");
+        System.out.println("[Engine] Process started (PID: " + process.pid() + ")");
         in = new BufferedWriter(new OutputStreamWriter(process.getOutputStream()));
 
-        // Thread pour capturer la sortie standard de l'engine
+        // Thread to capture engine standard output
         new Thread(() -> {
             try (BufferedReader br = new BufferedReader(
                     new InputStreamReader(process.getInputStream()))) {
@@ -58,12 +58,12 @@ public class Engine {
                     outQueue.put(line);
                 }
             } catch (Exception e) {
-                System.err.println("[Engine] Erreur lecture sortie: " + e.getMessage());
+                System.err.println("[Engine] Error reading output: " + e.getMessage());
                 e.printStackTrace();
             }
         }).start();
         
-        // Thread pour capturer les erreurs de l'engine
+        // Thread to capture engine errors
         new Thread(() -> {
             try (BufferedReader br = new BufferedReader(
                     new InputStreamReader(process.getErrorStream()))) {
@@ -72,21 +72,21 @@ public class Engine {
                     System.err.println("[Engine ERROR] " + enginePath + " -> " + line);
                 }
             } catch (Exception e) {
-                System.err.println("[Engine] Erreur lecture stderr: " + e.getMessage());
+                System.err.println("[Engine] Error reading stderr: " + e.getMessage());
             }
         }).start();
 
-        System.out.println("[Engine] Envoi de la commande 'uci'...");
+        System.out.println("[Engine] Sending 'uci' command...");
         send("uci");
-        System.out.println("[Engine] Attente de 'uciok'...");
+        System.out.println("[Engine] Waiting for 'uciok'...");
         waitFor("uciok");
-        System.out.println("[Engine] 'uciok' reçu");
+        System.out.println("[Engine] 'uciok' received");
         
-        System.out.println("[Engine] Envoi de la commande 'isready'...");
+        System.out.println("[Engine] Sending 'isready' command...");
         send("isready");
-        System.out.println("[Engine] Attente de 'readyok'...");
+        System.out.println("[Engine] Waiting for 'readyok'...");
         waitFor("readyok");
-        System.out.println("[Engine] 'readyok' reçu - Engine prêt!");
+        System.out.println("[Engine] 'readyok' received - Engine ready!");
     }
 
     public void send(String cmd) throws Exception {

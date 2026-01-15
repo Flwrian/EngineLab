@@ -71,23 +71,23 @@ public class MatchRunner {
             String[] pathParts = enginePath.replace("\\", "/").split("/");
             String engineName = pathParts[pathParts.length - 1];
             
-            System.out.println("\n[MatchRunner] Création des instances pour: " + engineName);
-            System.out.println("   Chemin: " + enginePath);
+            System.out.println("\n[MatchRunner] Creating instances for: " + engineName);
+            System.out.println("   Path: " + enginePath);
             System.out.println("   Instances: " + concurrency);
             
             for (int i = 0; i < concurrency; i++) {
-                System.out.println("\n[MatchRunner] Création instance " + (i + 1) + "/" + concurrency + " de " + engineName);
+                System.out.println("\n[MatchRunner] Creating instance " + (i + 1) + "/" + concurrency + " de " + engineName);
                 try {
                     Engine engine = new Engine(enginePath);
                     engineInstances.add(new EngineInstance(engine, engineName));
-                    System.out.println("[MatchRunner] Instance " + (i + 1) + " créée avec succès");
+                    System.out.println("[MatchRunner] Instance " + (i + 1) + " created successfully");
                 } catch (Exception e) {
-                    System.err.println("[MatchRunner] Échec création instance " + (i + 1) + ": " + e.getMessage());
+                    System.err.println("[MatchRunner] Failed to create instance " + (i + 1) + ": " + e.getMessage());
                     e.printStackTrace();
                     throw e;
                 }
             }
-            System.out.println("[MatchRunner] Toutes les instances de " + engineName + " créées");
+            System.out.println("[MatchRunner] All instances of " + engineName + " created");
         }
     }
 
@@ -118,23 +118,23 @@ public class MatchRunner {
             String[] pathParts = enginePath.replace("\\", "/").split("/");
             String engineName = pathParts[pathParts.length - 1];
             
-            System.out.println("\n[MatchRunner] Création des instances pour: " + engineName);
-            System.out.println("   Chemin: " + enginePath);
+            System.out.println("\n[MatchRunner] Creating instances for: " + engineName);
+            System.out.println("   Path: " + enginePath);
             System.out.println("   Instances: " + concurrency);
             
             for (int i = 0; i < concurrency; i++) {
-                System.out.println("\n[MatchRunner] Création instance " + (i + 1) + "/" + concurrency + " de " + engineName);
+                System.out.println("\n[MatchRunner] Creating instance " + (i + 1) + "/" + concurrency + " de " + engineName);
                 try {
                     Engine engine = new Engine(enginePath);
                     engineInstances.add(new EngineInstance(engine, engineName));
-                    System.out.println("[MatchRunner] Instance " + (i + 1) + " créée avec succès");
+                    System.out.println("[MatchRunner] Instance " + (i + 1) + " created successfully");
                 } catch (Exception e) {
-                    System.err.println("[MatchRunner] Échec création instance " + (i + 1) + ": " + e.getMessage());
+                    System.err.println("[MatchRunner] Failed to create instance " + (i + 1) + ": " + e.getMessage());
                     e.printStackTrace();
                     throw e;
                 }
             }
-            System.out.println("[MatchRunner] Toutes les instances de " + engineName + " créées");
+            System.out.println("[MatchRunner] All instances of " + engineName + " created");
         }
     }
     

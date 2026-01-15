@@ -15,7 +15,7 @@ public class ConfigMain {
         System.out.println("═══════════════════════════════════════════════");
         System.out.println("� EngineLab - Chess Engine Tournament System");
         System.out.println("═══════════════════════════════════════════════");
-        System.out.println("📋 Chargement de la configuration: " + configPath);
+        System.out.println("📋 Loading configuration: " + configPath);
         System.out.println();
         
         try {
@@ -25,13 +25,13 @@ public class ConfigMain {
             
             // Get engine paths
             List<String> enginePaths = config.getEnginePaths();
-            System.out.println("Validation de " + enginePaths.size() + " engine(s):");
+            System.out.println("Validating " + enginePaths.size() + " engine(s):");
             for (String path : enginePaths) {
                 System.out.println("   - " + path);
                 java.io.File engineFile = new java.io.File(path);
-                System.out.println("     ├─ Existe: " + engineFile.exists());
-                System.out.println("     ├─ Taille: " + engineFile.length() + " octets");
-                System.out.println("     └─ Exécutable: " + engineFile.canExecute());
+                System.out.println("     ├─ Exists: " + engineFile.exists());
+                System.out.println("     ├─ Size: " + engineFile.length() + " bytes");
+                System.out.println("     └─ Executable: " + engineFile.canExecute());
             }
             System.out.println();
             
@@ -70,7 +70,7 @@ public class ConfigMain {
             int wsPort = s.getWebSocket().isEnabled() ? s.getWebSocket().getPort() : 0;
             
             System.out.println("════════════════════════════════════════════════");
-            System.out.println("Initialisation du MatchRunner");
+            System.out.println("Initializing MatchRunner");
             System.out.println("════════════════════════════════════════════════");
             System.out.println("Engines: " + enginePaths.size());
             System.out.println("Concurrence: " + t.getConcurrency());
@@ -84,7 +84,7 @@ public class ConfigMain {
                 wsPort
             );
             
-            System.out.println("\nMatchRunner initialisé avec succès!");
+            System.out.println("\nMatchRunner initialized successfully!");
             System.out.println("════════════════════════════════════════════════\n");
             
             // Set stats manager if available

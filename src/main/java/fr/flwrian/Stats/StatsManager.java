@@ -14,7 +14,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
 /**
- * Gestionnaire de statistiques avec persistance JSON optionnelle
+ * Statistics manager with optional JSON persistence
  */
 public class StatsManager {
     private static final Logger logger = LoggerFactory.getLogger(StatsManager.class);
@@ -29,7 +29,7 @@ public class StatsManager {
         this.persistenceEnabled = persistenceEnabled;
         
         if (persistenceEnabled) {
-            // Créer le répertoire si nécessaire
+            // Create directory if necessary
             Path statsDir = Paths.get(statsDirectory);
             try {
                 Files.createDirectories(statsDir);
@@ -45,7 +45,7 @@ public class StatsManager {
     }
     
     /**
-     * Enregistre le résultat d'une partie
+     * Records game result
      */
     public synchronized void recordGame(GameResult result, String whiteEngine, String blackEngine, String timeControl) {
         stats.recordGameResult(whiteEngine, blackEngine, result.getResult(), timeControl);
@@ -56,14 +56,14 @@ public class StatsManager {
     }
     
     /**
-     * Retourne les statistiques actuelles
+     * Returns current statistics
      */
     public LeaderboardStats getStats() {
         return stats;
     }
     
     /**
-     * Sauvegarde les statistiques dans un fichier JSON
+     * Saves statistics to JSON file
      */
     private void saveStats() {
         if (!persistenceEnabled || statsFilePath == null) {
@@ -80,7 +80,7 @@ public class StatsManager {
     }
     
     /**
-     * Charge les statistiques depuis un fichier JSON
+     * Loads statistics from JSON file
      */
     private void loadStats() {
         if (!persistenceEnabled || statsFilePath == null) {
@@ -106,7 +106,7 @@ public class StatsManager {
     }
     
     /**
-     * Exporte les statistiques dans un fichier avec timestamp
+     * Exports statistics to file with timestamp
      */
     public void exportStats(String directory) {
         String timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss"));
@@ -123,7 +123,7 @@ public class StatsManager {
     }
     
     /**
-     * Réinitialise toutes les statistiques
+     * Resets all statistics
      */
     public synchronized void reset() {
         stats.getEngineStats().clear();
@@ -134,7 +134,7 @@ public class StatsManager {
     }
     
     /**
-     * Affiche un résumé des statistiques dans les logs
+     * Displays statistics summary in logs
      */
     public void printSummary() {
         logger.info("════════════════════════════════════════");
