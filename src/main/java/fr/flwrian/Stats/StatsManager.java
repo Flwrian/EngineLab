@@ -138,7 +138,7 @@ public class StatsManager {
      */
     public void printSummary() {
         logger.info("════════════════════════════════════════");
-        logger.info("📊 LEADERBOARD SUMMARY");
+        logger.info("LEADERBOARD SUMMARY");
         logger.info("════════════════════════════════════════");
         
         var leaderboard = stats.getLeaderboard();

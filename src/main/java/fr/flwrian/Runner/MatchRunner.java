@@ -71,23 +71,23 @@ public class MatchRunner {
             String[] pathParts = enginePath.replace("\\", "/").split("/");
             String engineName = pathParts[pathParts.length - 1];
             
-            System.out.println("\n🎯 [MatchRunner] Création des instances pour: " + engineName);
+            System.out.println("\n[MatchRunner] Création des instances pour: " + engineName);
             System.out.println("   Chemin: " + enginePath);
             System.out.println("   Instances: " + concurrency);
             
             for (int i = 0; i < concurrency; i++) {
-                System.out.println("\n🔄 [MatchRunner] Création instance " + (i + 1) + "/" + concurrency + " de " + engineName);
+                System.out.println("\n[MatchRunner] Création instance " + (i + 1) + "/" + concurrency + " de " + engineName);
                 try {
                     Engine engine = new Engine(enginePath);
                     engineInstances.add(new EngineInstance(engine, engineName));
-                    System.out.println("✓ [MatchRunner] Instance " + (i + 1) + " créée avec succès");
+                    System.out.println("[MatchRunner] Instance " + (i + 1) + " créée avec succès");
                 } catch (Exception e) {
-                    System.err.println("❌ [MatchRunner] Échec création instance " + (i + 1) + ": " + e.getMessage());
+                    System.err.println("[MatchRunner] Échec création instance " + (i + 1) + ": " + e.getMessage());
                     e.printStackTrace();
                     throw e;
                 }
             }
-            System.out.println("✓ [MatchRunner] Toutes les instances de " + engineName + " créées");
+            System.out.println("[MatchRunner] Toutes les instances de " + engineName + " créées");
         }
     }
 
@@ -118,23 +118,23 @@ public class MatchRunner {
             String[] pathParts = enginePath.replace("\\", "/").split("/");
             String engineName = pathParts[pathParts.length - 1];
             
-            System.out.println("\n🎯 [MatchRunner] Création des instances pour: " + engineName);
+            System.out.println("\n[MatchRunner] Création des instances pour: " + engineName);
             System.out.println("   Chemin: " + enginePath);
             System.out.println("   Instances: " + concurrency);
             
             for (int i = 0; i < concurrency; i++) {
-                System.out.println("\n🔄 [MatchRunner] Création instance " + (i + 1) + "/" + concurrency + " de " + engineName);
+                System.out.println("\n[MatchRunner] Création instance " + (i + 1) + "/" + concurrency + " de " + engineName);
                 try {
                     Engine engine = new Engine(enginePath);
                     engineInstances.add(new EngineInstance(engine, engineName));
-                    System.out.println("✓ [MatchRunner] Instance " + (i + 1) + " créée avec succès");
+                    System.out.println("[MatchRunner] Instance " + (i + 1) + " créée avec succès");
                 } catch (Exception e) {
-                    System.err.println("❌ [MatchRunner] Échec création instance " + (i + 1) + ": " + e.getMessage());
+                    System.err.println("[MatchRunner] Échec création instance " + (i + 1) + ": " + e.getMessage());
                     e.printStackTrace();
                     throw e;
                 }
             }
-            System.out.println("✓ [MatchRunner] Toutes les instances de " + engineName + " créées");
+            System.out.println("[MatchRunner] Toutes les instances de " + engineName + " créées");
         }
     }
     
@@ -187,15 +187,15 @@ public class MatchRunner {
      * @param mode "sequential" to cycle through positions, "random" to pick randomly
      */
     public void runPairs(int totalPairs, List<String> startFens, String mode) throws Exception {
-        System.out.println("\n🎮 ════════════════════════════════════════");
+        System.out.println("\n════════════════════════════════════════");
         System.out.println("   TOURNAMENT START");
         System.out.println("════════════════════════════════════════\n");
         
         // Display time control info
         if (timeControls.size() == 1) {
-            System.out.println("⏱️  Time Control: " + baseTimeControl);
+            System.out.println(" Time Control: " + baseTimeControl);
         } else {
-            System.out.println("⏱️  Random Time Controls (" + timeControls.size() + " variants):");
+            System.out.println(" Random Time Controls (" + timeControls.size() + " variants):");
             for (TimeControl tc : timeControls) {
                 long baseMs = tc.getWhiteTime();
                 long incMs = tc.getWhiteIncrement();
@@ -207,10 +207,10 @@ public class MatchRunner {
         }
         
         if (!startFens.isEmpty()) {
-            System.out.println("📖 Opening Book: " + startFens.size() + " positions (mode: " + mode + ")");
+            System.out.println("Opening Book: " + startFens.size() + " positions (mode: " + mode + ")");
         }
         
-        System.out.println("🎯 Target: " + totalPairs + " pairs (" + (totalPairs * 2) + " games)");
+        System.out.println("Target: " + totalPairs + " pairs (" + (totalPairs * 2) + " games)");
         System.out.println();
 
         // Calculate maximum expected time per pair using the longest time control
@@ -243,7 +243,7 @@ public class MatchRunner {
             // Pick 2 random DIFFERENT engines from available pool
             EngineInstance[] selectedPair = selectTwoDifferentEngines(availableEngines, random);
             if (selectedPair == null) {
-                System.err.println("⚠️ Cannot find 2 different engines in pool, waiting...");
+                System.err.println("Cannot find 2 different engines in pool, waiting...");
                 Thread.sleep(100);
                 continue;
             }
@@ -336,7 +336,7 @@ public class MatchRunner {
                 
                 // Print pair result with progress
                 System.out.println("┌" + "─".repeat(50) + "┐");
-                System.out.println("│ ✅ Pair " + pr.getPairId() + " Complete [" + pairsCompleted + "/" + totalPairs + "]" + " ".repeat(50 - 30 - String.valueOf(pr.getPairId()).length() - String.valueOf(pairsCompleted).length() - String.valueOf(totalPairs).length()) + "│");
+                System.out.println("│ Pair " + pr.getPairId() + " Complete [" + pairsCompleted + "/" + totalPairs + "]" + " ".repeat(50 - 30 - String.valueOf(pr.getPairId()).length() - String.valueOf(pairsCompleted).length() - String.valueOf(totalPairs).length()) + "│");
                 System.out.println("├" + "─".repeat(50) + "┤");
                 
                 // Print matchup
@@ -388,7 +388,7 @@ public class MatchRunner {
                     // Pick 2 random DIFFERENT engines from available pool
                     EngineInstance[] selectedPair = selectTwoDifferentEngines(availableEngines, random);
                     if (selectedPair == null) {
-                        System.err.println("⚠️  Cannot find 2 different engines in pool, waiting...");
+                        System.err.println(" Cannot find 2 different engines in pool, waiting...");
                         availableEngines.remove(freedEnginePair[0]);
                         availableEngines.remove(freedEnginePair[1]);
                         continue;
@@ -419,7 +419,7 @@ public class MatchRunner {
                 }
                 
             } catch (java.util.concurrent.TimeoutException e) {
-                System.err.println("⚠️ Pair " + pairsCompleted + " timed out after " + timeoutSeconds + " seconds - skipping");
+                System.err.println("Pair " + pairsCompleted + " timed out after " + timeoutSeconds + " seconds - skipping");
                 
                 // Remove the timed-out future from active pairs
                 activePairs.remove(completedFuture);
@@ -455,10 +455,10 @@ public class MatchRunner {
         }
 
         System.out.println("\n" + "═".repeat(60));
-        System.out.println("🏆 TOURNAMENT COMPLETE");
+        System.out.println("TOURNAMENT COMPLETE");
         System.out.println("═".repeat(60));
         System.out.println();
-        System.out.println("📊 Final Scores:");
+        System.out.println("Final Scores:");
         
         // Sort engines by score (descending)
         java.util.List<java.util.Map.Entry<String, Double>> sortedScores = new java.util.ArrayList<>(engineScores.entrySet());
@@ -482,12 +482,12 @@ public class MatchRunner {
             double secondScore = sortedScores.get(1).getValue();
             if (topScore > secondScore) {
                 double diff = topScore - secondScore;
-                System.out.println("🎖️  Winner: " + sortedScores.get(0).getKey() + " (+" + String.format("%.1f", diff) + ")");
+                System.out.println(" Winner: " + sortedScores.get(0).getKey() + " (+" + String.format("%.1f", diff) + ")");
             } else {
                 System.out.println("🤝 Draw!");
             }
         } else if (sortedScores.size() == 1) {
-            System.out.println("🎖️  Winner: " + sortedScores.get(0).getKey());
+            System.out.println(" Winner: " + sortedScores.get(0).getKey());
         }
         System.out.println("═".repeat(60) + "\n");
 
@@ -615,19 +615,19 @@ public class MatchRunner {
      * Stops all running games and closes connections gracefully.
      */
     public void forceShutdown() throws Exception {
-        System.out.println("🔌 Closing WebSocket connections...");
+        System.out.println("Closing WebSocket connections...");
         
         // Stop WebSocket server first (graceful close for browsers)
         if (wsServer != null) {
             wsServer.stop();
         }
         
-        System.out.println("⚙️ Stopping engine processes...");
+        System.out.println("Stopping engine processes...");
         
         // Force shutdown thread pool
         pool.shutdownNow();
         if (!pool.awaitTermination(5, TimeUnit.SECONDS)) {
-            System.out.println("⚠️ Some tasks did not terminate in time");
+            System.out.println("Some tasks did not terminate in time");
         }
         
         System.out.println("🧹 Cleanup complete");

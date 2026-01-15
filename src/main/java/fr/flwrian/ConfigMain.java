@@ -25,7 +25,7 @@ public class ConfigMain {
             
             // Get engine paths
             List<String> enginePaths = config.getEnginePaths();
-            System.out.println("✅ Validation de " + enginePaths.size() + " engine(s):");
+            System.out.println("Validation de " + enginePaths.size() + " engine(s):");
             for (String path : enginePaths) {
                 System.out.println("   - " + path);
                 java.io.File engineFile = new java.io.File(path);
@@ -41,7 +41,7 @@ public class ConfigMain {
                 boolean persistenceEnabled = config.getStats().isPersistenceEnabled();
                 String statsDir = config.getStats().getStatsDirectory();
                 statsManager = new StatsManager(persistenceEnabled, statsDir);
-                System.out.println("📊 Stats Manager initialized (persistence: " + (persistenceEnabled ? "enabled" : "disabled") + ")");
+                System.out.println("Stats Manager initialized (persistence: " + (persistenceEnabled ? "enabled" : "disabled") + ")");
                 if (persistenceEnabled) {
                     System.out.println("   Stats directory: " + statsDir);
                 }
@@ -70,7 +70,7 @@ public class ConfigMain {
             int wsPort = s.getWebSocket().isEnabled() ? s.getWebSocket().getPort() : 0;
             
             System.out.println("════════════════════════════════════════════════");
-            System.out.println("🎮 Initialisation du MatchRunner");
+            System.out.println("Initialisation du MatchRunner");
             System.out.println("════════════════════════════════════════════════");
             System.out.println("Engines: " + enginePaths.size());
             System.out.println("Concurrence: " + t.getConcurrency());
@@ -84,7 +84,7 @@ public class ConfigMain {
                 wsPort
             );
             
-            System.out.println("\n✓ MatchRunner initialisé avec succès!");
+            System.out.println("\nMatchRunner initialisé avec succès!");
             System.out.println("════════════════════════════════════════════════\n");
             
             // Set stats manager if available
@@ -95,7 +95,7 @@ public class ConfigMain {
             // Add shutdown hook
             Runtime.getRuntime().addShutdownHook(new Thread(() -> {
                 System.out.println("\n\n🛑 Shutdown signal received (Ctrl+C)...");
-                System.out.println("⏳ Stopping gracefully...");
+                System.out.println("Stopping gracefully...");
                 try {
                     // Print final stats summary
                     if (statsManager != null) {
@@ -104,7 +104,7 @@ public class ConfigMain {
                     }
                     
                     runner.forceShutdown();
-                    System.out.println("✅ Shutdown complete.");
+                    System.out.println("Shutdown complete.");
                 } catch (Exception e) {
                     System.err.println("Error during shutdown: " + e.getMessage());
                 }
@@ -123,7 +123,7 @@ public class ConfigMain {
             }
             
         } catch (Exception e) {
-            System.err.println("❌ Error: " + e.getMessage());
+            System.err.println("Error: " + e.getMessage());
             e.printStackTrace();
             System.exit(1);
         }

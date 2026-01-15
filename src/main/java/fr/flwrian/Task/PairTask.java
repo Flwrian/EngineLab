@@ -39,7 +39,7 @@ public class PairTask implements Callable<PairResult> {
         
         try {
             System.out.println("[" + threadName + "] === " + pair + " starting ===");
-            System.out.println("[" + threadName + "] 🎮 Matchup: " + engine1Name + " vs " + engine2Name);
+            System.out.println("[" + threadName + "] Matchup: " + engine1Name + " vs " + engine2Name);
             
             // Display FEN (truncate if too long for readability)
             String fen = pair.getStartFen();
@@ -93,7 +93,7 @@ public class PairTask implements Callable<PairResult> {
             return new PairResult(pair.getPairId(), results, engine1Name, engine2Name);
             
         } catch (Exception e) {
-            System.err.println("[" + threadName + "] ⚠️ Exception in pair " + pair.getPairId() + ": " + e.getMessage());
+            System.err.println("[" + threadName + "] Exception in pair " + pair.getPairId() + ": " + e.getMessage());
             e.printStackTrace();
             // If we have partial results, return them
             if (results.isEmpty()) {

@@ -10,8 +10,8 @@ package fr.flwrian;
  */
 public class Main {
     public static void main(String[] args) {
-        System.out.println("⚠️  EngineLab now uses config.yml for configuration.");
-        System.out.println("📖 See config.yml for details.");
+        System.out.println(" EngineLab now uses config.yml for configuration.");
+        System.out.println("See config.yml for details.");
         System.out.println("");
         System.out.println("Redirecting to ConfigMain...");
         System.out.println("─────────────────────────────────────");

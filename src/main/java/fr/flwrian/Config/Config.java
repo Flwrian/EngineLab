@@ -318,7 +318,7 @@ public class Config {
             throw new IOException("Concurrency must be positive (got: " + tournament.concurrency + ")");
         }
         if (tournament.concurrency > 16) {
-            System.out.println("⚠️  Warning: High concurrency (" + tournament.concurrency + ") may cause performance issues");
+            System.out.println(" Warning: High concurrency (" + tournament.concurrency + ") may cause performance issues");
         }
         
         if (tournament.pairsPerMatch <= 0) {
@@ -339,7 +339,7 @@ public class Config {
                 throw new IOException("incrementMs cannot be negative (got: " + tournament.timeControl.incrementMs + ")");
             }
             if (tournament.timeControl.baseTimeMs < 1000) {
-                System.out.println("⚠️  Warning: Very low base time (" + tournament.timeControl.baseTimeMs + "ms). Games may timeout.");
+                System.out.println(" Warning: Very low base time (" + tournament.timeControl.baseTimeMs + "ms). Games may timeout.");
             }
         }
         
@@ -354,7 +354,7 @@ public class Config {
                     throw new IOException("timeControls[" + i + "].incrementMs cannot be negative (got: " + tc.incrementMs + ")");
                 }
                 if (tc.baseTimeMs < 1000) {
-                    System.out.println("⚠️  Warning: timeControls[" + i + "] has very low base time (" + tc.baseTimeMs + "ms). Games may timeout.");
+                    System.out.println(" Warning: timeControls[" + i + "] has very low base time (" + tc.baseTimeMs + "ms). Games may timeout.");
                 }
             }
         }
@@ -424,7 +424,7 @@ public class Config {
         if (deployment != null && deployment.environment != null) {
             List<String> validEnvs = List.of("development", "production");
             if (!validEnvs.contains(deployment.environment)) {
-                System.out.println("⚠️  Warning: Unknown environment '" + deployment.environment + "'");
+                System.out.println(" Warning: Unknown environment '" + deployment.environment + "'");
             }
         }
         
@@ -512,7 +512,7 @@ public class Config {
                 }
             }
             
-            System.out.println("✅ Loaded " + positions.size() + " opening positions from " + tournament.openings.file);
+            System.out.println("Loaded " + positions.size() + " opening positions from " + tournament.openings.file);
             
         } catch (IOException e) {
             throw new IOException("Failed to read openings file: " + e.getMessage());
@@ -569,7 +569,7 @@ public class Config {
         
         if (server != null && server.getWebSocket() != null && server.getWebSocket().isEnabled()) {
             System.out.println("WebSocket:   " + server.getWebSocket().getHost() + ":" + server.getWebSocket().getPort());
-            System.out.println("🌐 Live View: http://localhost:" + server.getWebSocket().getPort() + "/live");
+            System.out.println("Live View: http://localhost:" + server.getWebSocket().getPort() + "/live");
         }
         System.out.println("===============================\n");
     }

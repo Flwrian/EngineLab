@@ -20,7 +20,7 @@ public class Engine {
         
         // Vérifications détaillées du fichier engine
         File engineFile = new File(path);
-        System.out.println("🔍 [Engine] Initialisation de l'engine: " + path);
+        System.out.println("[Engine] Initialisation de l'engine: " + path);
         System.out.println("  ├─ Chemin absolu: " + engineFile.getAbsolutePath());
         System.out.println("  ├─ Existe: " + engineFile.exists());
         System.out.println("  ├─ Est un fichier: " + engineFile.isFile());
@@ -29,23 +29,23 @@ public class Engine {
         System.out.println("  └─ Taille: " + engineFile.length() + " octets");
         
         if (!engineFile.exists()) {
-            throw new Exception("❌ Engine introuvable: " + path);
+            throw new Exception("Engine introuvable: " + path);
         }
         
         if (!engineFile.canExecute()) {
-            System.err.println("⚠️ Engine n'est pas exécutable: " + path);
+            System.err.println("Engine n'est pas exécutable: " + path);
             System.err.println("   Tentative de rendre exécutable...");
             engineFile.setExecutable(true);
         }
         
-        System.out.println("🚀 [Engine] Démarrage du processus...");
+        System.out.println("[Engine] Démarrage du processus...");
         process = new ProcessBuilder(path).start();
         
         if (!process.isAlive()) {
-            throw new Exception("❌ Le processus engine n'a pas démarré correctement");
+            throw new Exception("Le processus engine n'a pas démarré correctement");
         }
         
-        System.out.println("✓ [Engine] Processus démarré (PID: " + process.pid() + ")");
+        System.out.println("[Engine] Processus démarré (PID: " + process.pid() + ")");
         in = new BufferedWriter(new OutputStreamWriter(process.getOutputStream()));
 
         // Thread pour capturer la sortie standard de l'engine
@@ -54,11 +54,11 @@ public class Engine {
                     new InputStreamReader(process.getInputStream()))) {
                 String line;
                 while ((line = br.readLine()) != null) {
-                    System.out.println("📤 [Engine] " + enginePath + " -> " + line);
+                    System.out.println("[Engine] " + enginePath + " -> " + line);
                     outQueue.put(line);
                 }
             } catch (Exception e) {
-                System.err.println("❌ [Engine] Erreur lecture sortie: " + e.getMessage());
+                System.err.println("[Engine] Erreur lecture sortie: " + e.getMessage());
                 e.printStackTrace();
             }
         }).start();
@@ -69,28 +69,28 @@ public class Engine {
                     new InputStreamReader(process.getErrorStream()))) {
                 String line;
                 while ((line = br.readLine()) != null) {
-                    System.err.println("⚠️ [Engine ERROR] " + enginePath + " -> " + line);
+                    System.err.println("[Engine ERROR] " + enginePath + " -> " + line);
                 }
             } catch (Exception e) {
-                System.err.println("❌ [Engine] Erreur lecture stderr: " + e.getMessage());
+                System.err.println("[Engine] Erreur lecture stderr: " + e.getMessage());
             }
         }).start();
 
-        System.out.println("📨 [Engine] Envoi de la commande 'uci'...");
+        System.out.println("[Engine] Envoi de la commande 'uci'...");
         send("uci");
-        System.out.println("⏳ [Engine] Attente de 'uciok'...");
+        System.out.println("[Engine] Attente de 'uciok'...");
         waitFor("uciok");
-        System.out.println("✓ [Engine] 'uciok' reçu");
+        System.out.println("[Engine] 'uciok' reçu");
         
-        System.out.println("📨 [Engine] Envoi de la commande 'isready'...");
+        System.out.println("[Engine] Envoi de la commande 'isready'...");
         send("isready");
-        System.out.println("⏳ [Engine] Attente de 'readyok'...");
+        System.out.println("[Engine] Attente de 'readyok'...");
         waitFor("readyok");
-        System.out.println("✓ [Engine] 'readyok' reçu - Engine prêt!");
+        System.out.println("[Engine] 'readyok' reçu - Engine prêt!");
     }
 
     public void send(String cmd) throws Exception {
-        System.out.println("📥 [Engine] " + enginePath + " <- " + cmd);
+        System.out.println("[Engine] " + enginePath + " <- " + cmd);
         in.write(cmd + "\n");
         in.flush();
     }

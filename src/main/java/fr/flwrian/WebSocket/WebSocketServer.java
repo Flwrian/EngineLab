@@ -55,7 +55,7 @@ public class WebSocketServer {
     }
 
     public void stop() throws Exception {
-        System.out.println("🔌 Closing WebSocket connections gracefully...");
+        System.out.println("Closing WebSocket connections gracefully...");
         
         // Send a disconnect message to all clients before stopping
         try {
@@ -67,11 +67,11 @@ public class WebSocketServer {
             // Give clients a moment to receive the message
             Thread.sleep(500);
         } catch (Exception e) {
-            System.err.println("⚠️ Could not send disconnect message: " + e.getMessage());
+            System.err.println("Could not send disconnect message: " + e.getMessage());
         }
         
         server.stop();
-        System.out.println("✅ WebSocket server stopped");
+        System.out.println("WebSocket server stopped");
     }
 
     public void join() throws InterruptedException {
