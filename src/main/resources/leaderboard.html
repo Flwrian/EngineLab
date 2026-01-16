@@ -194,6 +194,25 @@
             color: #f0d9b5;
         }
 
+        .elo {
+            font-weight: bold;
+            font-size: 1.1em;
+        }
+
+        .elo-positive {
+            color: #81b64c;
+        }
+
+        .elo-negative {
+            color: #dc3545;
+        }
+
+        .elo-diff {
+            font-size: 0.85em;
+            opacity: 0.7;
+            font-weight: normal;
+        }
+
         .points {
             font-weight: bold;
             color: #81b64c;
@@ -478,6 +497,7 @@
                         <tr>
                             <th>Rank</th>
                             <th>Engine</th>
+                            <th>Elo</th>
                             <th>Games</th>
                             <th>Points</th>
                             <th>Wins</th>
@@ -573,8 +593,15 @@
 
             const engines = Object.values(stats.engineStats);
             const leaderboard = engines.sort((a, b) => {
+                // Sort by Elo first
+                const eloA = a.elo || 1500;
+                const eloB = b.elo || 1500;
+                if (eloB !== eloA) return eloB - eloA;
+                // Then by points
                 if (b.points !== a.points) return b.points - a.points;
+                // Then by wins
                 if (b.wins !== a.wins) return b.wins - a.wins;
+                // Finally by name
                 return a.engineName.localeCompare(b.engineName);
             });
 
@@ -602,11 +629,16 @@
             leaderboard.forEach((engine, index) => {
                 const medal = index === 0 ? '🥇' : index === 1 ? '🥈' : index === 2 ? '🥉' : '';
                 const winRate = engine.totalGames > 0 ? (engine.wins / engine.totalGames * 100).toFixed(1) : 0;
+                const elo = engine.elo || 1500;
+                const eloDiff = elo - 1500;
+                const eloClass = eloDiff > 0 ? 'elo-positive' : eloDiff < 0 ? 'elo-negative' : '';
+                const eloSign = eloDiff > 0 ? '+' : '';
                 
                 const row = document.createElement('tr');
                 row.innerHTML = `
                     <td class="rank"><span class="medal">${medal}</span>${index + 1}</td>
                     <td class="engine-name">${engine.engineName}</td>
+                    <td class="elo ${eloClass}">${elo} <span class="elo-diff">(${eloSign}${eloDiff})</span></td>
                     <td>${engine.totalGames}</td>
                     <td class="points">${engine.points.toFixed(1)}</td>
                     <td class="win-rate">${engine.wins}</td>

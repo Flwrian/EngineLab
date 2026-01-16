@@ -144,11 +144,12 @@ public class StatsManager {
         var leaderboard = stats.getLeaderboard();
         for (int i = 0; i < leaderboard.size(); i++) {
             var engineStats = leaderboard.get(i);
-            String medal = i == 0 ? "🥇" : i == 1 ? "🥈" : i == 2 ? "🥉" : "  ";
-            logger.info("{} {}. {} - {} pts ({} games: +{} ={} -{})",
-                medal,
-                i + 1,
+            String rank = String.format("%d.", i + 1);
+            logger.info("{} {} - Elo: {} (peak: {}) - {} pts ({} games: +{} ={} -{})",
+                rank,
                 engineStats.getEngineName(),
+                engineStats.getElo(),
+                engineStats.getPeakElo(),
                 String.format("%.1f", engineStats.getPoints()),
                 engineStats.getTotalGames(),
                 engineStats.getWins(),

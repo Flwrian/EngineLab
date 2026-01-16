@@ -18,6 +18,8 @@ public class LeaderboardStats {
         private int draws;
         private int losses;
         private double points; // 1 for win, 0.5 for draw, 0 for loss
+        private int elo; // Elo rating
+        private int peakElo; // Highest Elo reached
         
         // Stats par time control
         private Map<String, TimeControlStats> timeControlStats;
@@ -29,6 +31,8 @@ public class LeaderboardStats {
             this.draws = 0;
             this.losses = 0;
             this.points = 0.0;
+            this.elo = EloCalculator.DEFAULT_ELO;
+            this.peakElo = EloCalculator.DEFAULT_ELO;
             this.timeControlStats = new ConcurrentHashMap<>();
         }
         
@@ -55,6 +59,13 @@ public class LeaderboardStats {
             totalGames++;
             if (timeControl != null) {
                 getOrCreateTimeControlStats(timeControl).addLoss();
+            }
+        }
+        
+        public void updateElo(int newElo) {
+            this.elo = newElo;
+            if (newElo > peakElo) {
+                this.peakElo = newElo;
             }
         }
         
@@ -87,6 +98,8 @@ public class LeaderboardStats {
         public int getDraws() { return draws; }
         public int getLosses() { return losses; }
         public double getPoints() { return points; }
+        public int getElo() { return elo; }
+        public int getPeakElo() { return peakElo; }
         public Map<String, TimeControlStats> getTimeControlStats() { return timeControlStats; }
     }
     
@@ -142,12 +155,18 @@ public class LeaderboardStats {
     }
     
     /**
-     * Records game result
+     * Records game result and updates Elo ratings
      */
     public void recordGameResult(String whiteEngine, String blackEngine, String result, String timeControl) {
         EngineStats whiteStats = getOrCreateEngineStats(whiteEngine);
         EngineStats blackStats = getOrCreateEngineStats(blackEngine);
         
+        // Update Elo ratings
+        int[] newElos = EloCalculator.updateEloRatings(whiteStats.getElo(), blackStats.getElo(), result);
+        whiteStats.updateElo(newElos[0]);
+        blackStats.updateElo(newElos[1]);
+        
+        // Update game statistics
         switch (result) {
             case "1-0":
                 whiteStats.addWin(timeControl);
@@ -169,17 +188,21 @@ public class LeaderboardStats {
     }
     
     /**
-     * Returns statistics sorted by points
+     * Returns statistics sorted by Elo rating
      */
     public List<EngineStats> getLeaderboard() {
         List<EngineStats> leaderboard = new ArrayList<>(engineStats.values());
         leaderboard.sort((a, b) -> {
+            // Sort by Elo rating (higher first)
+            int eloCompare = Integer.compare(b.getElo(), a.getElo());
+            if (eloCompare != 0) return eloCompare;
+            // If same Elo, sort by points
             int pointsCompare = Double.compare(b.getPoints(), a.getPoints());
             if (pointsCompare != 0) return pointsCompare;
-            // Si égalité de points, trier par nombre de victoires
+            // If same points, sort by wins
             int winsCompare = Integer.compare(b.getWins(), a.getWins());
             if (winsCompare != 0) return winsCompare;
-            // Si égalité, trier par nom
+            // Finally, sort by name
             return a.getEngineName().compareTo(b.getEngineName());
         });
         return leaderboard;
@@ -215,6 +238,14 @@ public class LeaderboardStats {
             thisStats.losses += otherStats.losses;
             thisStats.totalGames += otherStats.totalGames;
             thisStats.points += otherStats.points;
+            
+            // Restore Elo from saved data (don't add, just restore)
+            if (otherStats.elo > 0) {
+                thisStats.elo = otherStats.elo;
+            }
+            if (otherStats.peakElo > thisStats.peakElo) {
+                thisStats.peakElo = otherStats.peakElo;
+            }
             
             // Fusionner les stats par time control
             for (Map.Entry<String, TimeControlStats> tcEntry : otherStats.timeControlStats.entrySet()) {
