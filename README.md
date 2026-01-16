@@ -41,86 +41,66 @@ The code is mounted as a volume, so you can edit files on your host and changes 
 - **Java**: 17 or higher (JDK)
 - **Maven**: 3.6+ for building
 - **OS**: Linux, macOS, or Windows with WSL
+### Configuration (minimal & tunnel-safe)
 
-### Docker
-- **Docker**: 20.10+
-- **Docker Compose**: 1.29+
+EngineLab uses a minimal, explicit config. We intentionally avoid "one-size-fits-all" options and keep the file small and honest.
 
-### Runtime
-- **Memory**: Minimum 1GB RAM, recommended 2GB+
-- **CPU**: Multi-core recommended for concurrent games
-- **Disk**: ~50MB for application + space for stats/logs
+Recommended `config.yml` (dev / tunnel usage):
 
-## Dependencies
-
-All dependencies are managed by Maven and automatically downloaded:
-
-### Core Dependencies
-- **Chesslib** (1.3.3) - Chess move validation and checkmate detection (maybe replaced with my own implementation based on Aspria but good for now)
-- **Jetty WebSocket** (11.0.18) - WebSocket server
-- **Jetty Server** (11.0.18) - HTTP server
-- **Jetty Servlet** (11.0.18) - Servlet support
-- **Jetty WebApp** (11.0.18) - Web application container
-- **Gson** (2.10.1) - JSON serialization for stats and WebSocket messages
-- **SnakeYAML** (2.2) - YAML configuration parsing
-- **SLF4J Simple** (2.0.9) - Logging implementation
-
-### Build Plugins
-- **Maven Shade Plugin** (3.5.1) - Creates executable JAR with all dependencies
-
-### Frontend
-- **Chessground.js** - Interactive chess board visualization
-- Vanilla JavaScript - No framework dependencies
-
-To see all dependencies:
-```bash
-mvn dependency:tree
-```
-
-## Configuration
-
-All settings in `config.yml`:
-
-### Tournament
 ```yaml
 tournament:
   name: "EngineLab Tournament"
-  mode: "pairs"                    # "pairs" or "round-robin"
+  mode: "pairs"
   engines:
-    - Aspira
-    - stockfish
-  concurrency: 1                   # Concurrent games (1 = sequential)
-  pairsPerMatch: 100              # Number of pairs (each pair = 2 games)
-  
-  # Multiple time controls - randomly selected per pair
+    - "Aspira_3"
+    - "stockfish"
+  concurrency: 1
+  pairsPerMatch: 100
   timeControls:
-    - baseTimeMs: 60000            # 1min + 1s (bullet)
-      incrementMs: 1000
-    - baseTimeMs: 180000           # 3min + 2s (blitz)
-      incrementMs: 2000
-  
+    - baseTimeMs: 5000
+      incrementMs: 100
   openings:
     enabled: true
-    file: "8moves.epd"            # EPD file with positions
-    mode: "random"                # "random" or "sequential"
-```
+    file: "8moves.epd"
+    mode: "random"
 
-### Server
-```yaml
 server:
   webSocket:
     enabled: true
-    host: "0.0.0.0"               # Bind address
+    host: "127.0.0.1"    # Localhost only - use a tunnel for external access
     port: 8080
-  
   http:
     enabled: true
-    host: "0.0.0.0"
+    host: "127.0.0.1"
     port: 8080
-  
   shutdown:
     gracefulTimeoutSeconds: 30
+
+paths:
+  engineDir: "./engines"
+  outputDir: "./output"
+  resourcesDir: "./src/main/resources"
+
+logging:
+  level: "WARN"          # Most verbose internal debug prints are disabled by default
+  logToFile: false
+  logToConsole: true
+  gameProgress: false
+  engineOutput: false
+  webSocketEvents: false
+
+performance:
+  engineStartupTimeoutSeconds: 10
+  engineResponseTimeoutSeconds: 60
+
+stats:
+  persistenceEnabled: true
+  statsDirectory: "./stats"
 ```
+
+Notes:
+- We purposely bind to `127.0.0.1` so the app is reachable only locally. Use an external tunnel (Cloudflare Tunnel, Tailscale, ngrok, etc.) to expose it securely.
+- Internal TLS/keystore options have been removed from the default config. If you want HTTPS/WSS in production, terminate TLS at the edge (reverse proxy / tunnel) and keep the app local.
 
 ### Paths
 ```yaml
@@ -191,8 +171,7 @@ Any UCI-compatible chess engine:
 # Clean build
 mvn clean package
 
-# Skip tests
-mvn package -DskipTests
+mvn package
 
 # Run directly
 mvn exec:java
