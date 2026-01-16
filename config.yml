@@ -27,7 +27,7 @@ paths:
 
 logging:
   level: "WARN"
-  engineCommunication: true
+  engineCommunication: false
 
 stats:
   persistenceEnabled: true
