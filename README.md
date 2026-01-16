@@ -33,7 +33,7 @@ Chess engine tournament system for UCI engines. Run automated tournaments betwee
 ./run.sh
 ```
 
-The code is mounted as a volume, so you can edit files on your host and changes are reflected immediately in the container.
+The code is mounted as a volume, so you can edit files on your host and it will reflect inside the container (need to restart the app to pick up changes).
 
 ## Requirements
 
