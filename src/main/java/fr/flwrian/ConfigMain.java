@@ -81,7 +81,8 @@ public class ConfigMain {
                 enginePaths,
                 t.getConcurrency(),
                 timeControls,
-                wsPort
+                wsPort,
+                config
             );
             
             System.out.println("\nMatchRunner initialized successfully!");

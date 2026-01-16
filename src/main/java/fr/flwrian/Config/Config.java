@@ -78,14 +78,17 @@ public class Config {
     public static class Server {
         private WebSocket webSocket;
         private Http http;
+        private Ssl ssl;
         private Shutdown shutdown;
         
         public WebSocket getWebSocket() { return webSocket; }
         public Http getHttp() { return http; }
+        public Ssl getSsl() { return ssl; }
         public Shutdown getShutdown() { return shutdown; }
         
         public void setWebSocket(WebSocket webSocket) { this.webSocket = webSocket; }
         public void setHttp(Http http) { this.http = http; }
+        public void setSsl(Ssl ssl) { this.ssl = ssl; }
         public void setShutdown(Shutdown shutdown) { this.shutdown = shutdown; }
     }
     
@@ -125,6 +128,26 @@ public class Config {
         public void setGracefulTimeoutSeconds(int gracefulTimeoutSeconds) { 
             this.gracefulTimeoutSeconds = gracefulTimeoutSeconds; 
         }
+    }
+    
+    public static class Ssl {
+        private boolean enabled;
+        private int port;
+        private String keyStorePath;
+        private String keyStorePassword;
+        private String keyStoreType;
+        
+        public boolean isEnabled() { return enabled; }
+        public int getPort() { return port; }
+        public String getKeyStorePath() { return keyStorePath; }
+        public String getKeyStorePassword() { return keyStorePassword; }
+        public String getKeyStoreType() { return keyStoreType; }
+        
+        public void setEnabled(boolean enabled) { this.enabled = enabled; }
+        public void setPort(int port) { this.port = port; }
+        public void setKeyStorePath(String keyStorePath) { this.keyStorePath = keyStorePath; }
+        public void setKeyStorePassword(String keyStorePassword) { this.keyStorePassword = keyStorePassword; }
+        public void setKeyStoreType(String keyStoreType) { this.keyStoreType = keyStoreType; }
     }
     
     public static class Paths {
@@ -382,9 +405,6 @@ public class Config {
             }
             if (performance.engineResponseTimeoutSeconds <= 0) {
                 throw new IOException("engineResponseTimeoutSeconds must be positive");
-            }
-            if (performance.maxThreadPoolSize <= 0) {
-                throw new IOException("maxThreadPoolSize must be positive");
             }
         }
         

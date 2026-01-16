@@ -6,6 +6,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
+import fr.flwrian.Config.Config;
 import fr.flwrian.Game.MatchPair;
 import fr.flwrian.Game.TimeControl;
 import fr.flwrian.Result.GameResult;
@@ -42,10 +43,14 @@ public class MatchRunner {
      * Create a match runner with multiple engines and multiple time controls.
      * @param enginePathsList List of paths to engine executables
      * @param concurrency Number of concurrent games
-     * @param timeControls List of time controls (one will be randomly selected per pair)
+     * @param configTimeControls List of time controls (one will be randomly selected per pair)
      * @param wsPort WebSocket server port (0 to disable)
+     * @param config Full configuration (for SSL settings)
      */
-    public MatchRunner(List<String> enginePathsList, int concurrency, List<fr.flwrian.Config.Config.TimeControl> configTimeControls, int wsPort) throws Exception {
+    public MatchRunner(List<String> enginePathsList, int concurrency, 
+                      List<fr.flwrian.Config.Config.TimeControl> configTimeControls, 
+                      int wsPort, 
+                      fr.flwrian.Config.Config config) throws Exception {
         this.pool = Executors.newFixedThreadPool(concurrency);
         
         // Convert Config.TimeControl to Game.TimeControl
@@ -57,9 +62,21 @@ public class MatchRunner {
         // Set baseTimeControl to first one for backward compatibility
         this.baseTimeControl = this.timeControls.get(0);
 
-        // Start WebSocket server if port specified
+        // Start WebSocket server with SSL support if configured
         if (wsPort > 0) {
-            this.wsServer = new WebSocketServer(wsPort);
+            fr.flwrian.Config.Config.Ssl sslConfig = config.getServer().getSsl();
+            if (sslConfig != null && sslConfig.isEnabled()) {
+                this.wsServer = new WebSocketServer(
+                    wsPort, 
+                    true, 
+                    sslConfig.getPort(),
+                    sslConfig.getKeyStorePath(),
+                    sslConfig.getKeyStorePassword(),
+                    sslConfig.getKeyStoreType()
+                );
+            } else {
+                this.wsServer = new WebSocketServer(wsPort);
+            }
             this.wsServer.start();
         } else {
             this.wsServer = null;
@@ -87,15 +104,30 @@ public class MatchRunner {
      * @param baseTimeMs Base time in milliseconds (e.g., 60000 for 1 minute)
      * @param incrementMs Increment per move in milliseconds (e.g., 1000 for 1 second)
      * @param wsPort WebSocket server port (0 to disable)
+     * @param config Full configuration (for SSL settings)
      */
-    public MatchRunner(List<String> enginePathsList, int concurrency, long baseTimeMs, long incrementMs, int wsPort) throws Exception {
+    public MatchRunner(List<String> enginePathsList, int concurrency, long baseTimeMs, long incrementMs, int wsPort, Config config) throws Exception {
         this.pool = Executors.newFixedThreadPool(concurrency);
         this.baseTimeControl = new TimeControl(baseTimeMs, incrementMs);
         this.timeControls = java.util.Arrays.asList(this.baseTimeControl);  // Single time control
 
         // Start WebSocket server if port specified
         if (wsPort > 0) {
-            this.wsServer = new WebSocketServer(wsPort);
+            Config.Ssl sslConfig = config.getServer().getSsl();
+            if (sslConfig != null && sslConfig.isEnabled()) {
+                // SSL mode: WSS + HTTPS
+                this.wsServer = new WebSocketServer(
+                    wsPort, 
+                    true, 
+                    sslConfig.getPort(), 
+                    sslConfig.getKeyStorePath(), 
+                    sslConfig.getKeyStorePassword(), 
+                    sslConfig.getKeyStoreType()
+                );
+            } else {
+                // Standard HTTP WebSocket
+                this.wsServer = new WebSocketServer(wsPort);
+            }
             this.wsServer.start();
         } else {
             this.wsServer = null;
@@ -123,23 +155,26 @@ public class MatchRunner {
      * @param baseTimeMs Base time in milliseconds
      * @param incrementMs Increment per move in milliseconds
      * @param wsPort WebSocket server port (0 to disable)
+     * @param config Full configuration (for SSL settings)
      */
-    public MatchRunner(String enginePath, int concurrency, long baseTimeMs, long incrementMs, int wsPort) throws Exception {
-        this(java.util.Arrays.asList(enginePath), concurrency, baseTimeMs, incrementMs, wsPort);
+    public MatchRunner(String enginePath, int concurrency, long baseTimeMs, long incrementMs, int wsPort, Config config) throws Exception {
+        this(java.util.Arrays.asList(enginePath), concurrency, baseTimeMs, incrementMs, wsPort, config);
     }
     
     /**
      * Create a match runner with default WebSocket port 8080.
+     * @param config Full configuration (for SSL settings)
      */
-    public MatchRunner(String enginePath, int concurrency, long baseTimeMs, long incrementMs) throws Exception {
-        this(enginePath, concurrency, baseTimeMs, incrementMs, 8080);
+    public MatchRunner(String enginePath, int concurrency, long baseTimeMs, long incrementMs, Config config) throws Exception {
+        this(enginePath, concurrency, baseTimeMs, incrementMs, 8080, config);
     }
     
     /**
      * Create a match runner for multiple engines with default WebSocket port 8080.
+     * @param config Full configuration (for SSL settings)
      */
-    public MatchRunner(List<String> enginePaths, int concurrency, long baseTimeMs, long incrementMs) throws Exception {
-        this(enginePaths, concurrency, baseTimeMs, incrementMs, 8080);
+    public MatchRunner(List<String> enginePaths, int concurrency, long baseTimeMs, long incrementMs, Config config) throws Exception {
+        this(enginePaths, concurrency, baseTimeMs, incrementMs, 8080, config);
     }
     /**
      * Run paired games (each pair consists of 2 games with swapped colors).

@@ -2,8 +2,13 @@ package fr.flwrian.WebSocket;
 
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.ServerConnector;
+import org.eclipse.jetty.server.HttpConfiguration;
+import org.eclipse.jetty.server.HttpConnectionFactory;
+import org.eclipse.jetty.server.SecureRequestCustomizer;
+import org.eclipse.jetty.server.SslConnectionFactory;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
+import org.eclipse.jetty.util.ssl.SslContextFactory;
 import org.eclipse.jetty.websocket.server.config.JettyWebSocketServletContainerInitializer;
 
 import jakarta.servlet.ServletException;
@@ -12,21 +17,50 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.time.Duration;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 
 /**
- * WebSocket server for live game streaming.
+ * WebSocket server for live game streaming with SSL/TLS support.
  */
 public class WebSocketServer {
     private final Server server;
     private final int port;
+    private final boolean sslEnabled;
+    private final int sslPort;
 
     public WebSocketServer(int port) {
+        this(port, false, 8443, null, null, null);
+    }
+
+    public WebSocketServer(int port, boolean sslEnabled, int sslPort, 
+                          String keyStorePath, String keyStorePassword, String keyStoreType) {
         this.port = port;
+        this.sslEnabled = sslEnabled;
+        this.sslPort = sslPort;
         this.server = new Server();
         
-        ServerConnector connector = new ServerConnector(server);
-        connector.setPort(port);
-        server.addConnector(connector);
+        // HTTP connector
+        ServerConnector httpConnector = new ServerConnector(server);
+        httpConnector.setPort(port);
+        server.addConnector(httpConnector);
+        
+        // HTTPS/WSS connector (if SSL enabled)
+        if (sslEnabled && keyStorePath != null && keyStorePassword != null) {
+            try {
+                if (!Files.exists(Paths.get(keyStorePath))) {
+                    System.err.println("⚠️  SSL keystore not found: " + keyStorePath);
+                    System.err.println("   Falling back to HTTP only");
+                } else {
+                    ServerConnector httpsConnector = createSslConnector(keyStorePath, keyStorePassword, keyStoreType);
+                    server.addConnector(httpsConnector);
+                    System.out.println("✅ SSL/TLS enabled on port " + sslPort);
+                }
+            } catch (Exception e) {
+                System.err.println("⚠️  Failed to configure SSL: " + e.getMessage());
+                System.err.println("   Falling back to HTTP only");
+            }
+        }
 
         ServletContextHandler context = new ServletContextHandler(ServletContextHandler.SESSIONS);
         context.setContextPath("/");
@@ -47,11 +81,57 @@ public class WebSocketServer {
         context.addServlet(new ServletHolder(new IndexServlet()), "/");
     }
 
+    /**
+     * Create SSL/TLS connector for HTTPS and WSS.
+     */
+    private ServerConnector createSslConnector(String keyStorePath, String keyStorePassword, String keyStoreType) {
+        // SSL Context Factory
+        SslContextFactory.Server sslContextFactory = new SslContextFactory.Server();
+        sslContextFactory.setKeyStorePath(keyStorePath);
+        sslContextFactory.setKeyStorePassword(keyStorePassword);
+        sslContextFactory.setKeyStoreType(keyStoreType != null ? keyStoreType : "PKCS12");
+        
+        // Secure protocols
+        sslContextFactory.setIncludeProtocols("TLSv1.2", "TLSv1.3");
+        sslContextFactory.setExcludeProtocols("SSLv3", "TLSv1", "TLSv1.1");
+        
+        // Strong ciphers only
+        sslContextFactory.setIncludeCipherSuites(
+            "TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256",
+            "TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384",
+            "TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305_SHA256",
+            "TLS_AES_128_GCM_SHA256",
+            "TLS_AES_256_GCM_SHA384",
+            "TLS_CHACHA20_POLY1305_SHA256"
+        );
+        
+        // HTTP Configuration for HTTPS
+        HttpConfiguration httpsConfig = new HttpConfiguration();
+        httpsConfig.setSecureScheme("https");
+        httpsConfig.setSecurePort(sslPort);
+        httpsConfig.addCustomizer(new SecureRequestCustomizer());
+        
+        // SSL Connector
+        ServerConnector sslConnector = new ServerConnector(
+            server,
+            new SslConnectionFactory(sslContextFactory, "http/1.1"),
+            new HttpConnectionFactory(httpsConfig)
+        );
+        sslConnector.setPort(sslPort);
+        
+        return sslConnector;
+    }
+
     public void start() throws Exception {
         server.start();
         System.out.println("WebSocket server started on port " + port);
         System.out.println("WebSocket endpoint: ws://localhost:" + port + "/ws");
         System.out.println("HTTP status: http://localhost:" + port + "/status");
+        
+        if (sslEnabled) {
+            System.out.println("✅ Secure WebSocket endpoint: wss://localhost:" + sslPort + "/ws");
+            System.out.println("✅ HTTPS status: https://localhost:" + sslPort + "/status");
+        }
     }
 
     public void stop() throws Exception {

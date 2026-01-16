@@ -1,104 +1,50 @@
 # EngineLab Configuration
-# Complete configuration file for tournament setup and deployment
 
-# Tournament configuration
 tournament:
   name: "EngineLab Tournament"
-  mode: "pairs"  # Options: "pairs", "round-robin"
-  
-  # Engine selection from the engine pool
+  mode: "pairs"
   engines:
     - "Aspira_3"
     - "stockfish"
-  
-  # Execution settings
-  concurrency: 1          # Number of concurrent games (1 = sequential)
-  pairsPerMatch: 100      # Number of pairs to play (each pair = 2 games)
-  
-  # Time controls (in milliseconds)
-  # You can define multiple time controls - one will be randomly selected for each pair
-  # Or use a single time control for all games
+  concurrency: 1
+  pairsPerMatch: 100
   timeControls:
-    - baseTimeMs: 5000      # 5 seconds + 0.1s increment (bullet)
+    - baseTimeMs: 5000
       incrementMs: 100
-    # Example: Multiple time controls (uncomment to enable)
-    # - baseTimeMs: 10000     # 10 seconds + 0.1s increment (bullet+)
-    #   incrementMs: 100
-    # - baseTimeMs: 60000     # 1 minute + 1s increment (blitz)
-    #   incrementMs: 1000
-    # - baseTimeMs: 180000    # 3 minutes + 2s increment (blitz)
-    #   incrementMs: 2000
-  
-  # Starting positions configuration
   openings:
-    enabled: true                    # Enable opening book
-    file: "8moves.epd"              # Path to EPD/FEN file (one position per line)
-    mode: "random"                  # Options: "sequential", "random"
-    # sequential: use positions in order, cycling when reaching end
-    # random: pick a random position for each game
+    enabled: true
+    file: "8moves.epd"
+    mode: "random"
 
-# Server configuration
 server:
-  # WebSocket settings
   webSocket:
     enabled: true
-    host: "0.0.0.0"       # Bind to all interfaces (use "localhost" for local only)
-    port: 8080            # WebSocket port
-  
-  # HTTP settings (for serving UI and status)
+    host: "127.0.0.1"
+    port: 8080
   http:
     enabled: true
-    host: "0.0.0.0"
-    port: 8080            # Same as WebSocket for simplicity
-  
-  # Shutdown settings
+    host: "127.0.0.1"
+    port: 8080
   shutdown:
-    gracefulTimeoutSeconds: 30  # Time to wait for games to complete
+    gracefulTimeoutSeconds: 30
 
-# Paths configuration
 paths:
-  engineDir: "./engines"         # Directory containing engine executables
-  outputDir: "./output"          # Directory for game results, logs, PGN
-  logDir: "./logs"               # Directory for server logs
-  resourcesDir: "./src/main/resources"  # UI resources (live.html, etc.)
+  engineDir: "./engines"
+  outputDir: "./output"
+  resourcesDir: "./src/main/resources"
 
-# Logging configuration
 logging:
-  level: "INFO"                  # Options: "DEBUG", "INFO", "WARN", "ERROR"
-  logToFile: false               # Write logs to file
-  logToConsole: true             # Print logs to console
-  
-  # What to log
-  gameProgress: true             # Log game progress (moves, time)
-  gameProgressInterval: 20       # Log every N moves
-  engineOutput: false            # Log raw engine output (verbose)
-  webSocketEvents: false         # Log WebSocket connections/disconnections
+  level: "INFO"
+  logToFile: false
+  logToConsole: true
+  gameProgress: false
+  engineOutput: false
+  webSocketEvents: false
 
-# Performance settings
 performance:
-  # Engine process settings
   engineStartupTimeoutSeconds: 10
   engineResponseTimeoutSeconds: 60
-  
-  # Thread pool settings
-  maxThreadPoolSize: 10          # Maximum number of worker threads
-  
-  # Memory settings (JVM will be configured accordingly)
-  # These are hints for deployment, not enforced by the app
-  recommendedHeapSizeMB: 512
 
-# Deployment settings (for Docker, cloud, etc.)
-deployment:
-  # Environment
-  environment: "development"     # Options: "development", "production"
-  
-  # Health check endpoint
-  healthCheck:
-    enabled: true
-    endpoint: "/health"
-    interval: 30                 # Seconds between checks
-
-# Stats and leaderboard configuration
 stats:
-  persistenceEnabled: true       # Save/load stats from JSON file
-  statsDirectory: "./stats"      # Directory for stats storage
+  persistenceEnabled: true
+  statsDirectory: "./stats"
