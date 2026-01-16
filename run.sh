@@ -12,7 +12,7 @@ if [ ! -f "$CONFIG" ]; then
 fi
 
 echo "Building project..."
-mvn clean package -DskipTests
+mvn clean package
 
 echo "Starting EngineLab with $CONFIG"
 java -jar target/enginelab-1.0-SNAPSHOT.jar "$CONFIG"
