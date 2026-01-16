@@ -171,7 +171,7 @@ Any UCI-compatible chess engine:
 # Clean build
 mvn clean package
 
-mvn package
+gmvn package
 
 # Run directly
 mvn exec:java
