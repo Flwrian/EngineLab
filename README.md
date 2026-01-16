@@ -116,12 +116,10 @@ This is useful for debugging engine issues or understanding how engines think.
 
 ## Web Interface
 
-Once started, the server will display the local network IP address:
-- **Live view**: `http://<your-ip>:8080/live` - Watch games in real-time with interactive chessboard
-- **Leaderboard**: `http://<your-ip>:8080/leaderboard` - View rankings and detailed stats
-- **WebSocket**: `ws://<your-ip>:8080/ws` - Direct WebSocket connection
+- **Live view**: `http://localhost:8080/live` - Watch games in real-time with interactive chessboard
+- **Leaderboard**: `http://localhost:8080/leaderboard` - View rankings and detailed stats
+- **WebSocket**: `ws://localhost:8080/ws` - Direct WebSocket connection
 
-The server automatically detects your local IP, making it easy to access from other devices on your network.
 
 ## Adding Engines
 
@@ -142,18 +140,6 @@ Any UCI-compatible chess engine:
 - Komodo
 - Custom engines
 
-## Building
-
-```bash
-# Clean build
-mvn clean package
-
-# Run tests
-mvn test
-
-# Create executable JAR
-mvn package
-java -jar target/enginelab-1.0-SNAPSHOT.jar
 ```
 
 ## Project Structure
