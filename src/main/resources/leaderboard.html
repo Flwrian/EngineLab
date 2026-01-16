@@ -515,48 +515,45 @@
         const maxReconnectAttempts = 10;
 
         function connect() {
-            const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-            const wsUrl = `${protocol}//${window.location.hostname}:${window.location.port}/ws`;
-            
-            ws = new WebSocket(wsUrl);
+    const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+    const wsUrl = `${protocol}//${window.location.host}/ws`;
 
-            ws.onopen = () => {
-                console.log('Connected to EngineLab');
-                reconnectAttempts = 0;
-                updateStatus(true);
-                
-                // Request leaderboard data
-                ws.send(JSON.stringify({ type: 'get_leaderboard' }));
-            };
+    ws = new WebSocket(wsUrl);
 
-            ws.onmessage = (event) => {
-                try {
-                    const data = JSON.parse(event.data);
-                    
-                    if (data.type === 'leaderboard') {
-                        updateLeaderboard(data.stats);
-                    }
-                } catch (e) {
-                    console.error('Error parsing message:', e);
-                }
-            };
+    ws.onopen = () => {
+        console.log('Connected to EngineLab');
+        reconnectAttempts = 0;
+        updateStatus(true);
+        ws.send(JSON.stringify({ type: 'get_leaderboard' }));
+    };
 
-            ws.onclose = () => {
-                console.log('Disconnected from EngineLab');
-                updateStatus(false);
-                
-                if (reconnectAttempts < maxReconnectAttempts) {
-                    reconnectAttempts++;
-                    const delay = Math.min(1000 * Math.pow(2, reconnectAttempts), 30000);
-                    console.log(`Reconnecting in ${delay}ms...`);
-                    setTimeout(connect, delay);
-                }
-            };
-
-            ws.onerror = (error) => {
-                console.error('WebSocket error:', error);
-            };
+    ws.onmessage = (event) => {
+        try {
+            const data = JSON.parse(event.data);
+            if (data.type === 'leaderboard') {
+                updateLeaderboard(data.stats);
+            }
+        } catch (e) {
+            console.error('Error parsing message:', e);
         }
+    };
+
+    ws.onclose = () => {
+        console.log('Disconnected from EngineLab');
+        updateStatus(false);
+        if (reconnectAttempts < maxReconnectAttempts) {
+            reconnectAttempts++;
+            const delay = Math.min(1000 * Math.pow(2, reconnectAttempts), 30000);
+            console.log(`Reconnecting in ${delay}ms...`);
+            setTimeout(connect, delay);
+        }
+    };
+
+    ws.onerror = (error) => {
+        console.error('WebSocket error:', error);
+    };
+}
+
 
         function updateStatus(connected) {
             const status = document.getElementById('status');

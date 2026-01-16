@@ -841,46 +841,48 @@
         }
 
         function connectWebSocket() {
-            const wsUrl = `ws://${window.location.host}/ws`;
-            console.log(`🔌 Connecting to ${wsUrl}...`);
-            ws = new WebSocket(wsUrl);
+    const protocol = window.location.protocol === "https:" ? "wss" : "ws";
+    const wsUrl = `${protocol}://${window.location.host}/ws`;
+    console.log(`🔌 Connecting to ${wsUrl}...`);
+    ws = new WebSocket(wsUrl);
 
-            ws.onopen = () => {
-                console.log('✅ WebSocket connected');
-                reconnectAttempts = 0;
-                const statusEl = document.getElementById('status');
-                statusEl.innerHTML = '<span class="status-dot"></span>Connected';
-                statusEl.className = 'status connected';
-            };
+    ws.onopen = () => {
+        console.log('✅ WebSocket connected');
+        reconnectAttempts = 0;
+        const statusEl = document.getElementById('status');
+        statusEl.innerHTML = '<span class="status-dot"></span>Connected';
+        statusEl.className = 'status connected';
+    };
 
-            ws.onclose = () => {
-                console.log('❌ WebSocket disconnected');
-                const statusEl = document.getElementById('status');
-                statusEl.innerHTML = '<span class="status-dot"></span>Disconnected';
-                statusEl.className = 'status';
-                
-                if (reconnectAttempts < 10) {
-                    const delay = Math.min(1000 * Math.pow(2, reconnectAttempts), 30000);
-                    reconnectAttempts++;
-                    console.log(`🔄 Reconnecting in ${delay}ms (attempt ${reconnectAttempts})...`);
-                    setTimeout(connectWebSocket, delay);
-                }
-            };
-
-            ws.onerror = (error) => {
-                console.error('❌ WebSocket error:', error);
-            };
-
-            ws.onmessage = (event) => {
-                try {
-                    const message = JSON.parse(event.data);
-                    console.log('📨 Message received:', message.type);
-                    handleMessage(message);
-                } catch (e) {
-                    console.error('Failed to parse WebSocket message:', e);
-                }
-            };
+    ws.onclose = () => {
+        console.log('❌ WebSocket disconnected');
+        const statusEl = document.getElementById('status');
+        statusEl.innerHTML = '<span class="status-dot"></span>Disconnected';
+        statusEl.className = 'status';
+        
+        if (reconnectAttempts < 10) {
+            const delay = Math.min(1000 * Math.pow(2, reconnectAttempts), 30000);
+            reconnectAttempts++;
+            console.log(`🔄 Reconnecting in ${delay}ms (attempt ${reconnectAttempts})...`);
+            setTimeout(connectWebSocket, delay);
         }
+    };
+
+    ws.onerror = (error) => {
+        console.error('❌ WebSocket error:', error);
+    };
+
+    ws.onmessage = (event) => {
+        try {
+            const message = JSON.parse(event.data);
+            console.log('📨 Message received:', message.type);
+            handleMessage(message);
+        } catch (e) {
+            console.error('Failed to parse WebSocket message:', e);
+        }
+    };
+}
+
 
         function handleMessage(message) {
             switch (message.type) {
