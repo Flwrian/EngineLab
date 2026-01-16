@@ -30,8 +30,7 @@ public class Config {
         private List<String> engines;
         private int concurrency;
         private int pairsPerMatch;
-        private TimeControl timeControl;  // Legacy: single time control (deprecated)
-        private List<TimeControl> timeControls;  // New: multiple time controls
+        private List<TimeControl> timeControls;
         private Openings openings;
         
         public String getName() { return name; }
@@ -39,7 +38,6 @@ public class Config {
         public List<String> getEngines() { return engines; }
         public int getConcurrency() { return concurrency; }
         public int getPairsPerMatch() { return pairsPerMatch; }
-        public TimeControl getTimeControl() { return timeControl; }
         public List<TimeControl> getTimeControls() { return timeControls; }
         public Openings getOpenings() { return openings; }
         
@@ -48,7 +46,6 @@ public class Config {
         public void setEngines(List<String> engines) { this.engines = engines; }
         public void setConcurrency(int concurrency) { this.concurrency = concurrency; }
         public void setPairsPerMatch(int pairsPerMatch) { this.pairsPerMatch = pairsPerMatch; }
-        public void setTimeControl(TimeControl timeControl) { this.timeControl = timeControl; }
         public void setTimeControls(List<TimeControl> timeControls) { this.timeControls = timeControls; }
         public void setOpenings(Openings openings) { this.openings = openings; }
     }
@@ -311,37 +308,22 @@ public class Config {
             throw new IOException("pairsPerMatch must be positive (got: " + tournament.pairsPerMatch + ")");
         }
         
-        // Validate time control(s)
-        if (tournament.timeControl == null && (tournament.timeControls == null || tournament.timeControls.isEmpty())) {
-            throw new IOException("Missing 'timeControl' or 'timeControls' section");
+        // Validate timeControls
+        if (tournament.timeControls == null || tournament.timeControls.isEmpty()) {
+            throw new IOException("Missing 'timeControls' section - at least one time control is required");
         }
         
-        // Validate single timeControl if present
-        if (tournament.timeControl != null) {
-            if (tournament.timeControl.baseTimeMs <= 0) {
-                throw new IOException("baseTimeMs must be positive (got: " + tournament.timeControl.baseTimeMs + ")");
+        // Validate each time control
+        for (int i = 0; i < tournament.timeControls.size(); i++) {
+            TimeControl tc = tournament.timeControls.get(i);
+            if (tc.baseTimeMs <= 0) {
+                throw new IOException("timeControls[" + i + "].baseTimeMs must be positive (got: " + tc.baseTimeMs + ")");
             }
-            if (tournament.timeControl.incrementMs < 0) {
-                throw new IOException("incrementMs cannot be negative (got: " + tournament.timeControl.incrementMs + ")");
+            if (tc.incrementMs < 0) {
+                throw new IOException("timeControls[" + i + "].incrementMs cannot be negative (got: " + tc.incrementMs + ")");
             }
-            if (tournament.timeControl.baseTimeMs < 1000) {
-                System.out.println(" Warning: Very low base time (" + tournament.timeControl.baseTimeMs + "ms). Games may timeout.");
-            }
-        }
-        
-        // Validate timeControls list if present
-        if (tournament.timeControls != null && !tournament.timeControls.isEmpty()) {
-            for (int i = 0; i < tournament.timeControls.size(); i++) {
-                TimeControl tc = tournament.timeControls.get(i);
-                if (tc.baseTimeMs <= 0) {
-                    throw new IOException("timeControls[" + i + "].baseTimeMs must be positive (got: " + tc.baseTimeMs + ")");
-                }
-                if (tc.incrementMs < 0) {
-                    throw new IOException("timeControls[" + i + "].incrementMs cannot be negative (got: " + tc.incrementMs + ")");
-                }
-                if (tc.baseTimeMs < 1000) {
-                    System.out.println(" Warning: timeControls[" + i + "] has very low base time (" + tc.baseTimeMs + "ms). Games may timeout.");
-                }
+            if (tc.baseTimeMs < 1000) {
+                System.out.println(" Warning: timeControls[" + i + "] has very low base time (" + tc.baseTimeMs + "ms). Games may timeout.");
             }
         }
         
@@ -509,17 +491,12 @@ public class Config {
     
     /**
      * Get effective list of time controls.
-     * Returns timeControls if available, otherwise wraps single timeControl in a list.
      */
     public List<TimeControl> getTimeControls() {
         if (tournament.getTimeControls() != null && !tournament.getTimeControls().isEmpty()) {
             return tournament.getTimeControls();
         }
-        // Fallback to single timeControl for backward compatibility
-        if (tournament.getTimeControl() != null) {
-            return java.util.Arrays.asList(tournament.getTimeControl());
-        }
-        throw new IllegalStateException("No time control(s) configured");
+        throw new IllegalStateException("No time controls configured");
     }
     
     /**

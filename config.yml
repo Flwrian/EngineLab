@@ -16,10 +16,12 @@ tournament:
   pairsPerMatch: 100      # Number of pairs to play (each pair = 2 games)
   
   # Time controls (in milliseconds)
-  # Multiple time controls can be defined - one will be randomly selected for each pair
+  # You can define multiple time controls - one will be randomly selected for each pair
+  # Or use a single time control for all games
   timeControls:
     - baseTimeMs: 5000      # 5 seconds + 0.1s increment (bullet)
       incrementMs: 100
+    # Example: Multiple time controls (uncomment to enable)
     # - baseTimeMs: 10000     # 10 seconds + 0.1s increment (bullet+)
     #   incrementMs: 100
     # - baseTimeMs: 60000     # 1 minute + 1s increment (blitz)
