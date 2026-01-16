@@ -200,27 +200,13 @@ public class Config {
     
     public static class Deployment {
         private String environment;
-        private Docker docker;
         private HealthCheck healthCheck;
         
         public String getEnvironment() { return environment; }
-        public Docker getDocker() { return docker; }
         public HealthCheck getHealthCheck() { return healthCheck; }
         
         public void setEnvironment(String environment) { this.environment = environment; }
-        public void setDocker(Docker docker) { this.docker = docker; }
         public void setHealthCheck(HealthCheck healthCheck) { this.healthCheck = healthCheck; }
-    }
-    
-    public static class Docker {
-        private boolean enabled;
-        private String containerName;
-        
-        public boolean isEnabled() { return enabled; }
-        public String getContainerName() { return containerName; }
-        
-        public void setEnabled(boolean enabled) { this.enabled = enabled; }
-        public void setContainerName(String containerName) { this.containerName = containerName; }
     }
     
     public static class HealthCheck {

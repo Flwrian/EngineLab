@@ -90,11 +90,6 @@ deployment:
   # Environment
   environment: "development"     # Options: "development", "production"
   
-  # Docker-specific settings (used when running in container)
-  docker:
-    enabled: false
-    containerName: "enginelab"
-    
   # Health check endpoint
   healthCheck:
     enabled: true
