@@ -6,23 +6,23 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
-import fr.flwrian.Engine.Engine;
 import fr.flwrian.Game.MatchPair;
 import fr.flwrian.Game.TimeControl;
 import fr.flwrian.Result.GameResult;
 import fr.flwrian.Result.PairResult;
 import fr.flwrian.Stats.StatsManager;
-import fr.flwrian.Task.PairTask;
 import fr.flwrian.WebSocket.GameWebSocket;
 import fr.flwrian.WebSocket.WebSocketServer;
 
 /**
  * Manages a match between engines with proper time control and pair management.
  * Supports both single games and paired games (with color swapping).
+ * Engines are created on-demand when needed and closed after each game to save resources.
  */
 public class MatchRunner {
     private final ExecutorService pool;
-    private final List<EngineInstance> engineInstances = new ArrayList<>();
+    private final List<String> enginePaths = new ArrayList<>();
+    private final List<String> engineNames = new ArrayList<>();
     private final TimeControl baseTimeControl;  // Legacy: for single time control
     private final List<TimeControl> timeControls;  // New: for multiple time controls
     private final WebSocketServer wsServer;
@@ -40,12 +40,12 @@ public class MatchRunner {
 
     /**
      * Create a match runner with multiple engines and multiple time controls.
-     * @param enginePaths List of paths to engine executables
+     * @param enginePathsList List of paths to engine executables
      * @param concurrency Number of concurrent games
      * @param timeControls List of time controls (one will be randomly selected per pair)
      * @param wsPort WebSocket server port (0 to disable)
      */
-    public MatchRunner(List<String> enginePaths, int concurrency, List<fr.flwrian.Config.Config.TimeControl> configTimeControls, int wsPort) throws Exception {
+    public MatchRunner(List<String> enginePathsList, int concurrency, List<fr.flwrian.Config.Config.TimeControl> configTimeControls, int wsPort) throws Exception {
         this.pool = Executors.newFixedThreadPool(concurrency);
         
         // Convert Config.TimeControl to Game.TimeControl
@@ -65,41 +65,30 @@ public class MatchRunner {
             this.wsServer = null;
         }
 
-        // Create engine pool: concurrency instances of each engine
-        for (String enginePath : enginePaths) {
+        // Store engine paths and names for on-demand creation
+        for (String enginePath : enginePathsList) {
             // Extract engine name from path
             String[] pathParts = enginePath.replace("\\", "/").split("/");
             String engineName = pathParts[pathParts.length - 1];
             
-            System.out.println("\n[MatchRunner] Creating instances for: " + engineName);
-            System.out.println("   Path: " + enginePath);
-            System.out.println("   Instances: " + concurrency);
+            this.enginePaths.add(enginePath);
+            this.engineNames.add(engineName);
             
-            for (int i = 0; i < concurrency; i++) {
-                System.out.println("\n[MatchRunner] Creating instance " + (i + 1) + "/" + concurrency + " de " + engineName);
-                try {
-                    Engine engine = new Engine(enginePath);
-                    engineInstances.add(new EngineInstance(engine, engineName));
-                    System.out.println("[MatchRunner] Instance " + (i + 1) + " created successfully");
-                } catch (Exception e) {
-                    System.err.println("[MatchRunner] Failed to create instance " + (i + 1) + ": " + e.getMessage());
-                    e.printStackTrace();
-                    throw e;
-                }
-            }
-            System.out.println("[MatchRunner] All instances of " + engineName + " created");
+            System.out.println("[MatchRunner] Registered engine: " + engineName + " (" + enginePath + ")");
         }
+        
+        System.out.println("[MatchRunner] Engines will be created on-demand (concurrency: " + concurrency + ")");
     }
 
     /**
      * Create a match runner with multiple engines for round-robin tournament.
-     * @param enginePaths List of paths to engine executables
+     * @param enginePathsList List of paths to engine executables
      * @param concurrency Number of concurrent games
      * @param baseTimeMs Base time in milliseconds (e.g., 60000 for 1 minute)
      * @param incrementMs Increment per move in milliseconds (e.g., 1000 for 1 second)
      * @param wsPort WebSocket server port (0 to disable)
      */
-    public MatchRunner(List<String> enginePaths, int concurrency, long baseTimeMs, long incrementMs, int wsPort) throws Exception {
+    public MatchRunner(List<String> enginePathsList, int concurrency, long baseTimeMs, long incrementMs, int wsPort) throws Exception {
         this.pool = Executors.newFixedThreadPool(concurrency);
         this.baseTimeControl = new TimeControl(baseTimeMs, incrementMs);
         this.timeControls = java.util.Arrays.asList(this.baseTimeControl);  // Single time control
@@ -112,30 +101,19 @@ public class MatchRunner {
             this.wsServer = null;
         }
 
-        // Create engine pool: concurrency instances of each engine
-        for (String enginePath : enginePaths) {
+        // Store engine paths and names for on-demand creation
+        for (String enginePath : enginePathsList) {
             // Extract engine name from path
             String[] pathParts = enginePath.replace("\\", "/").split("/");
             String engineName = pathParts[pathParts.length - 1];
             
-            System.out.println("\n[MatchRunner] Creating instances for: " + engineName);
-            System.out.println("   Path: " + enginePath);
-            System.out.println("   Instances: " + concurrency);
+            this.enginePaths.add(enginePath);
+            this.engineNames.add(engineName);
             
-            for (int i = 0; i < concurrency; i++) {
-                System.out.println("\n[MatchRunner] Creating instance " + (i + 1) + "/" + concurrency + " de " + engineName);
-                try {
-                    Engine engine = new Engine(enginePath);
-                    engineInstances.add(new EngineInstance(engine, engineName));
-                    System.out.println("[MatchRunner] Instance " + (i + 1) + " created successfully");
-                } catch (Exception e) {
-                    System.err.println("[MatchRunner] Failed to create instance " + (i + 1) + ": " + e.getMessage());
-                    e.printStackTrace();
-                    throw e;
-                }
-            }
-            System.out.println("[MatchRunner] All instances of " + engineName + " created");
+            System.out.println("[MatchRunner] Registered engine: " + engineName + " (" + enginePath + ")");
         }
+        
+        System.out.println("[MatchRunner] Engines will be created on-demand (concurrency: " + concurrency + ")");
     }
     
     /**
@@ -225,53 +203,55 @@ public class MatchRunner {
         long maxTimePerPair = (long) ((2 * (longestTC.getWhiteTime() + 60 * longestTC.getWhiteIncrement()) * 2) * 1.5);
         long timeoutSeconds = maxTimePerPair / 1000;
 
-        // Track which engine instances are available
-        java.util.Queue<EngineInstance> availableEngines = new java.util.LinkedList<>(engineInstances);
-        
         // Random number generator for selecting engines
         java.util.Random random = new java.util.Random();
         
-        // Track futures with their engine pairs
-        java.util.Map<java.util.concurrent.Future<PairResult>, EngineInstance[]> activePairs = new java.util.HashMap<>();
+        // Track futures with their engine info
+        java.util.Map<java.util.concurrent.Future<PairResult>, String[]> activePairs = new java.util.HashMap<>();
         java.util.Map<java.util.concurrent.Future<PairResult>, String> pairTimeControls = new java.util.HashMap<>();
         
         int pairsSubmitted = 0;
         int pairsCompleted = 0;
         
-        // Submit initial batch of pairs (up to concurrency / 2)
-        while (pairsSubmitted < totalPairs && availableEngines.size() >= 2) {
-            // Pick 2 random DIFFERENT engines from available pool
-            EngineInstance[] selectedPair = selectTwoDifferentEngines(availableEngines, random);
-            if (selectedPair == null) {
-                System.err.println("Cannot find 2 different engines in pool, waiting...");
-                Thread.sleep(100);
-                continue;
+        // Calculate concurrency for pairs (each pair = 2 games, so max concurrent pairs = pool size / 2)
+        int concurrency = ((java.util.concurrent.ThreadPoolExecutor) pool).getCorePoolSize();
+        int maxConcurrentPairs = Math.max(1, concurrency / 2);
+        
+        // Submit initial batch of pairs (up to max concurrent pairs)
+        while (pairsSubmitted < totalPairs && pairsSubmitted < maxConcurrentPairs) {
+            // Pick 2 random DIFFERENT engines
+            int[] selectedIndices = selectTwoDifferentEngineIndices(random);
+            if (selectedIndices == null) {
+                System.err.println("Cannot select 2 different engines (need at least 2 engines)");
+                throw new Exception("Tournament requires at least 2 different engines");
             }
             
-            EngineInstance engine1 = selectedPair[0];
-            EngineInstance engine2 = selectedPair[1];
-            availableEngines.remove(engine1);
-            availableEngines.remove(engine2);
+            int idx1 = selectedIndices[0];
+            int idx2 = selectedIndices[1];
+            String enginePath1 = enginePaths.get(idx1);
+            String enginePath2 = enginePaths.get(idx2);
+            String engineName1 = engineNames.get(idx1);
+            String engineName2 = engineNames.get(idx2);
             
             String fen = selectStartingPosition(startFens, pairsSubmitted, mode, random);
             TimeControl selectedTC = selectRandomTimeControl(random);
             MatchPair pair = new MatchPair(fen, pairsSubmitted);
             
             java.util.concurrent.Future<PairResult> future = pool.submit(
-                new PairTask(pair, 
-                    engine1.getEngine(), engine2.getEngine(), 
+                new fr.flwrian.Task.OnDemandPairTask(pair, 
+                    enginePath1, enginePath2, 
                     selectedTC, 
-                    engine1.getName(), engine2.getName())
+                    engineName1, engineName2)
             );
-            activePairs.put(future, new EngineInstance[]{engine1, engine2});
+            activePairs.put(future, new String[]{engineName1, engineName2});
             pairTimeControls.put(future, formatTimeControl(selectedTC));
             pairsSubmitted++;
         }
 
         // Track scores per engine name
         java.util.Map<String, Double> engineScores = new java.util.HashMap<>();
-        for (EngineInstance ei : engineInstances) {
-            engineScores.put(ei.getName(), 0.0);
+        for (String engineName : engineNames) {
+            engineScores.put(engineName, 0.0);
         }
         int totalGames = 0;
 
@@ -306,14 +286,14 @@ public class MatchRunner {
                 engineScores.put(pr.getEngine2Name(), 
                     engineScores.getOrDefault(pr.getEngine2Name(), 0.0) + pr.getEngine2Score());
                 
-                // Get engine info and time control for this pair
-                EngineInstance[] engines = activePairs.get(completedFuture);
+                // Get engine names and time control for this pair
+                String[] engineNamesForPair = activePairs.get(completedFuture);
                 String timeControl = pairTimeControls.get(completedFuture);
                 
                 // Record stats if available
-                if (statsManager != null && engines != null && engines.length == 2) {
-                    String engine1Name = engines[0].getName();
-                    String engine2Name = engines[1].getName();
+                if (statsManager != null && engineNamesForPair != null && engineNamesForPair.length == 2) {
+                    String engine1Name = engineNamesForPair[0];
+                    String engine2Name = engineNamesForPair[1];
                     
                     // Use "Unknown" if timeControl is null (shouldn't happen but defensive)
                     String tc = (timeControl != null) ? timeControl : "Unknown";
@@ -336,7 +316,7 @@ public class MatchRunner {
                 
                 // Print pair result with progress
                 System.out.println("┌" + "─".repeat(50) + "┐");
-                System.out.println("│ Pair " + pr.getPairId() + " Complete [" + pairsCompleted + "/" + totalPairs + "]" + " ".repeat(50 - 30 - String.valueOf(pr.getPairId()).length() - String.valueOf(pairsCompleted).length() - String.valueOf(totalPairs).length()) + "│");
+                System.out.println("│ Pair " + pr.getPairId() + " Complete [" + (pairsCompleted + 1) + "/" + totalPairs + "]" + " ".repeat(50 - 30 - String.valueOf(pr.getPairId()).length() - String.valueOf(pairsCompleted + 1).length() - String.valueOf(totalPairs).length()) + "│");
                 System.out.println("├" + "─".repeat(50) + "┤");
                 
                 // Print matchup
@@ -372,82 +352,69 @@ public class MatchRunner {
                 
                 pairsCompleted++;
                 
-                // Get the engine pair that just finished
-                EngineInstance[] freedEnginePair = activePairs.remove(completedFuture);
-                
-                // Submit next pair if available
-                if (pairsSubmitted < totalPairs) {
-                    // Reset engines before reusing them
-                    freedEnginePair[0].getEngine().reset();
-                    freedEnginePair[1].getEngine().reset();
-                    
-                    // Put freed engines back in pool
-                    availableEngines.add(freedEnginePair[0]);
-                    availableEngines.add(freedEnginePair[1]);
-                    
-                    // Pick 2 random DIFFERENT engines from available pool
-                    EngineInstance[] selectedPair = selectTwoDifferentEngines(availableEngines, random);
-                    if (selectedPair == null) {
-                        System.err.println(" Cannot find 2 different engines in pool, waiting...");
-                        availableEngines.remove(freedEnginePair[0]);
-                        availableEngines.remove(freedEnginePair[1]);
-                        continue;
-                    }
-                    
-                    EngineInstance engine1 = selectedPair[0];
-                    EngineInstance engine2 = selectedPair[1];
-                    availableEngines.remove(engine1);
-                    availableEngines.remove(engine2);
-                    
-                    String fen = selectStartingPosition(startFens, pairsSubmitted, mode, random);
-                    TimeControl selectedTC = selectRandomTimeControl(random);
-                    MatchPair pair = new MatchPair(fen, pairsSubmitted);
-                    
-                    java.util.concurrent.Future<PairResult> future = pool.submit(
-                        new PairTask(pair, 
-                            engine1.getEngine(), engine2.getEngine(), 
-                            selectedTC, 
-                            engine1.getName(), engine2.getName())
-                    );
-                    activePairs.put(future, new EngineInstance[]{engine1, engine2});
-                    pairTimeControls.put(future, formatTimeControl(selectedTC));
-                    pairsSubmitted++;
-                } else {
-                    // No more pairs to submit, put engines back in pool for cleanup
-                    availableEngines.add(freedEnginePair[0]);
-                    availableEngines.add(freedEnginePair[1]);
-                }
-                
-            } catch (java.util.concurrent.TimeoutException e) {
-                System.err.println("Pair " + pairsCompleted + " timed out after " + timeoutSeconds + " seconds - skipping");
-                
-                // Remove the timed-out future from active pairs
+                // Remove completed pair
                 activePairs.remove(completedFuture);
-                pairsCompleted++;
+                pairTimeControls.remove(completedFuture);
                 
-                // Task is still running but we move on. The thread will be forcefully stopped during shutdown.
-                // Don't reuse these engines as they might still be in use
-                
-                // Try to submit next pair with fresh engines if available
-                if (pairsSubmitted < totalPairs && availableEngines.size() >= 2) {
-                    EngineInstance[] selectedPair = selectTwoDifferentEngines(availableEngines, random);
-                    if (selectedPair != null) {
-                        EngineInstance engine1 = selectedPair[0];
-                        EngineInstance engine2 = selectedPair[1];
-                        availableEngines.remove(engine1);
-                        availableEngines.remove(engine2);
+                // Submit next pair if available and under concurrency limit
+                if (pairsSubmitted < totalPairs) {
+                    // Pick 2 random DIFFERENT engines
+                    int[] selectedIndices = selectTwoDifferentEngineIndices(random);
+                    if (selectedIndices != null) {
+                        int idx1 = selectedIndices[0];
+                        int idx2 = selectedIndices[1];
+                        String enginePath1 = enginePaths.get(idx1);
+                        String enginePath2 = enginePaths.get(idx2);
+                        String engineName1 = this.engineNames.get(idx1);
+                        String engineName2 = this.engineNames.get(idx2);
                         
                         String fen = selectStartingPosition(startFens, pairsSubmitted, mode, random);
                         TimeControl selectedTC = selectRandomTimeControl(random);
                         MatchPair pair = new MatchPair(fen, pairsSubmitted);
                         
                         java.util.concurrent.Future<PairResult> future = pool.submit(
-                            new PairTask(pair, 
-                                engine1.getEngine(), engine2.getEngine(), 
+                            new fr.flwrian.Task.OnDemandPairTask(pair, 
+                                enginePath1, enginePath2, 
                                 selectedTC, 
-                                engine1.getName(), engine2.getName())
+                                engineName1, engineName2)
                         );
-                        activePairs.put(future, new EngineInstance[]{engine1, engine2});
+                        activePairs.put(future, new String[]{engineName1, engineName2});
+                        pairTimeControls.put(future, formatTimeControl(selectedTC));
+                        pairsSubmitted++;
+                    }
+                }
+                
+            } catch (java.util.concurrent.TimeoutException e) {
+                System.err.println("Pair timed out after " + timeoutSeconds + " seconds - skipping");
+                
+                // Remove the timed-out future from active pairs
+                activePairs.remove(completedFuture);
+                pairTimeControls.remove(completedFuture);
+                pairsCompleted++;
+                
+                // Submit next pair if available
+                if (pairsSubmitted < totalPairs) {
+                    int[] selectedIndices = selectTwoDifferentEngineIndices(random);
+                    if (selectedIndices != null) {
+                        int idx1 = selectedIndices[0];
+                        int idx2 = selectedIndices[1];
+                        String enginePath1 = enginePaths.get(idx1);
+                        String enginePath2 = enginePaths.get(idx2);
+                        String engineName1 = this.engineNames.get(idx1);
+                        String engineName2 = this.engineNames.get(idx2);
+                        
+                        String fen = selectStartingPosition(startFens, pairsSubmitted, mode, random);
+                        TimeControl selectedTC = selectRandomTimeControl(random);
+                        MatchPair pair = new MatchPair(fen, pairsSubmitted);
+                        
+                        java.util.concurrent.Future<PairResult> future = pool.submit(
+                            new fr.flwrian.Task.OnDemandPairTask(pair, 
+                                enginePath1, enginePath2, 
+                                selectedTC, 
+                                engineName1, engineName2)
+                        );
+                        activePairs.put(future, new String[]{engineName1, engineName2});
+                        pairTimeControls.put(future, formatTimeControl(selectedTC));
                         pairsSubmitted++;
                     }
                 }
@@ -495,41 +462,24 @@ public class MatchRunner {
     }
     
     /**
-     * Select 2 different engines randomly from the available pool.
-     * Ensures the two engines have different names (no self-play).
-     * 
-     * @param availableEngines Queue of available engine instances
+     * Select 2 random DIFFERENT engine indices from registered engines.
      * @param random Random number generator
-     * @return Array of 2 different engines, or null if not possible
+     * @return Array of 2 different indices, or null if not enough engines
      */
-    private EngineInstance[] selectTwoDifferentEngines(java.util.Queue<EngineInstance> availableEngines, java.util.Random random) {
-        if (availableEngines.size() < 2) {
+    private int[] selectTwoDifferentEngineIndices(java.util.Random random) {
+        if (enginePaths.size() < 2) {
             return null;
         }
         
-        EngineInstance[] availableArray = availableEngines.toArray(new EngineInstance[0]);
+        int idx1 = random.nextInt(enginePaths.size());
+        int idx2;
         
-        // Try to find 2 engines with different names
-        // First, pick a random engine
-        EngineInstance engine1 = availableArray[random.nextInt(availableArray.length)];
+        // Make sure we select a different engine
+        do {
+            idx2 = random.nextInt(enginePaths.size());
+        } while (idx2 == idx1);
         
-        // Then, try to find another engine with a different name
-        java.util.List<EngineInstance> differentEngines = new java.util.ArrayList<>();
-        for (EngineInstance e : availableArray) {
-            if (!e.getName().equals(engine1.getName())) {
-                differentEngines.add(e);
-            }
-        }
-        
-        if (differentEngines.isEmpty()) {
-            // All available engines have the same name, cannot pair
-            return null;
-        }
-        
-        // Pick a random engine from those with different names
-        EngineInstance engine2 = differentEngines.get(random.nextInt(differentEngines.size()));
-        
-        return new EngineInstance[]{engine1, engine2};
+        return new int[]{idx1, idx2};
     }
 
     /**

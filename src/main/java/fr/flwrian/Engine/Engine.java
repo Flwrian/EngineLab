@@ -139,4 +139,27 @@ public class Engine {
     public boolean isAlive() {
         return process.isAlive();
     }
+    
+    /**
+     * Close the engine process properly.
+     */
+    public void close() {
+        try {
+            System.out.println("[Engine] Closing engine: " + enginePath);
+            send("quit");
+            
+            // Give the engine 2 seconds to close gracefully
+            boolean exited = process.waitFor(2, TimeUnit.SECONDS);
+            
+            if (!exited) {
+                System.err.println("[Engine] Engine did not exit gracefully, forcing termination");
+                process.destroyForcibly();
+            }
+            
+            System.out.println("[Engine] Engine closed: " + enginePath);
+        } catch (Exception e) {
+            System.err.println("[Engine] Error closing engine: " + e.getMessage());
+            process.destroyForcibly();
+        }
+    }
 }
