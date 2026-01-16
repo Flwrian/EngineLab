@@ -14,6 +14,14 @@ public class Engine {
     private final BufferedWriter in;
     private final BlockingQueue<String> outQueue = new LinkedBlockingQueue<>();
     private final String enginePath;
+    private static boolean logCommunication = false;
+
+    /**
+     * Enable or disable UCI communication logging for all engines.
+     */
+    public static void setLogCommunication(boolean enabled) {
+        logCommunication = enabled;
+    }
 
     public Engine(String path) throws Exception {
         this.enginePath = path;
@@ -54,7 +62,9 @@ public class Engine {
                     new InputStreamReader(process.getInputStream()))) {
                 String line;
                 while ((line = br.readLine()) != null) {
-                    // System.out.println("[Engine] " + enginePath + " -> " + line);
+                    if (logCommunication) {
+                        System.out.println("[UCI ->] " + line);
+                    }
                     outQueue.put(line);
                 }
             } catch (Exception e) {
@@ -90,7 +100,9 @@ public class Engine {
     }
 
     public void send(String cmd) throws Exception {
-        // System.out.println("[Engine] " + enginePath + " <- " + cmd);
+        if (logCommunication) {
+            System.out.println("[UCI <-] " + cmd);
+        }
         in.write(cmd + "\n");
         in.flush();
     }

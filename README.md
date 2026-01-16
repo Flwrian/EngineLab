@@ -82,12 +82,8 @@ paths:
   resourcesDir: "./src/main/resources"
 
 logging:
-  level: "WARN"          # Most verbose internal debug prints are disabled by default
-  logToFile: false
-  logToConsole: true
-  gameProgress: false
-  engineOutput: false
-  webSocketEvents: false
+  level: "WARN"                    # DEBUG, INFO, WARN, ERROR
+  engineCommunication: false       # Log all UCI commands (<-) and responses (->)
 
 performance:
   engineStartupTimeoutSeconds: 10
@@ -115,13 +111,31 @@ paths:
 ```yaml
 logging:
   level: "INFO"                   # DEBUG, INFO, WARN, ERROR
-  logToFile: false
-  logToConsole: true
-  gameProgress: true
-  gameProgressInterval: 20        # Log every N moves
-  engineOutput: false             # Raw engine output
-  webSocketEvents: false
+  engineCommunication: false      # Log all UCI protocol communication
 ```
+
+**UCI Communication Logging**
+
+When `engineCommunication: true`, all UCI protocol communication is logged to the console:
+- `[UCI <-]` - Commands sent TO the engine
+- `[UCI ->]` - Responses received FROM the engine
+
+Example output:
+```
+[UCI <-] uci
+[UCI ->] id name Stockfish 16
+[UCI ->] id author the Stockfish developers
+[UCI ->] uciok
+[UCI <-] isready
+[UCI ->] readyok
+[UCI <-] position startpos moves e2e4
+[UCI <-] go wtime 60000 btime 60000 winc 1000 binc 1000
+[UCI ->] info depth 1 seldepth 1 score cp 52 nodes 20 nps 20000 pv e7e5
+[UCI ->] info depth 2 seldepth 2 score cp 49 nodes 40 nps 40000 pv e7e5 g1f3
+[UCI ->] bestmove e7e5
+```
+
+This is useful for debugging engine issues or understanding how engines think.
 
 ### Performance
 ```yaml

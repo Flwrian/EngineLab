@@ -19,31 +19,15 @@ tournament:
 server:
   webSocket:
     enabled: true
-    host: "127.0.0.1"
     port: 8080
-  http:
-    enabled: true
-    host: "127.0.0.1"
-    port: 8080
-  shutdown:
-    gracefulTimeoutSeconds: 30
 
 paths:
   engineDir: "./engines"
-  outputDir: "./output"
   resourcesDir: "./src/main/resources"
 
 logging:
   level: "WARN"
-  logToFile: false
-  logToConsole: true
-  gameProgress: false
-  engineOutput: false
-  webSocketEvents: false
-
-performance:
-  engineStartupTimeoutSeconds: 10
-  engineResponseTimeoutSeconds: 60
+  engineCommunication: true
 
 stats:
   persistenceEnabled: true

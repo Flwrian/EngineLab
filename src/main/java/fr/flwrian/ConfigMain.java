@@ -23,6 +23,13 @@ public class ConfigMain {
             Config config = Config.load(configPath);
             config.printSummary();
             
+            // Enable UCI communication logging if configured
+            if (config.getLogging() != null && config.getLogging().isEngineCommunication()) {
+                fr.flwrian.Engine.Engine.setLogCommunication(true);
+                System.out.println("🔍 UCI communication logging enabled");
+                System.out.println();
+            }
+            
             // Get engine paths
             List<String> enginePaths = config.getEnginePaths();
             System.out.println("Validating " + enginePaths.size() + " engine(s):");

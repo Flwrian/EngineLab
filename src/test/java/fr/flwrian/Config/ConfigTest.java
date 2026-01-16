@@ -32,38 +32,13 @@ class ConfigTest {
             server:
               webSocket:
                 enabled: true
-                host: "localhost"
                 port: 8080
-              http:
-                enabled: true
-                host: "localhost"
-                port: 8080
-              shutdown:
-                gracefulTimeoutSeconds: 30
             paths:
               engineDir: "./engines"
-              outputDir: "./output"
-              logDir: "./logs"
               resourcesDir: "./resources"
             logging:
               level: "INFO"
-              logToFile: false
-              logToConsole: true
-              gameProgress: true
-              gameProgressInterval: 20
-              engineOutput: false
-              webSocketEvents: false
-            performance:
-              engineStartupTimeoutSeconds: 10
-              engineResponseTimeoutSeconds: 60
-              maxThreadPoolSize: 10
-              recommendedHeapSizeMB: 512
-            deployment:
-              environment: "development"
-              healthCheck:
-                enabled: true
-                endpoint: "/health"
-                interval: 30
+              engineCommunication: false
             stats:
               persistenceEnabled: true
               statsDirectory: "./stats"
@@ -107,38 +82,13 @@ class ConfigTest {
             server:
               webSocket:
                 enabled: true
-                host: "localhost"
                 port: 8080
-              http:
-                enabled: true
-                host: "localhost"
-                port: 8080
-              shutdown:
-                gracefulTimeoutSeconds: 30
             paths:
               engineDir: "./engines"
-              outputDir: "./output"
-              logDir: "./logs"
               resourcesDir: "./resources"
             logging:
               level: "INFO"
-              logToFile: false
-              logToConsole: true
-              gameProgress: true
-              gameProgressInterval: 20
-              engineOutput: false
-              webSocketEvents: false
-            performance:
-              engineStartupTimeoutSeconds: 10
-              engineResponseTimeoutSeconds: 60
-              maxThreadPoolSize: 10
-              recommendedHeapSizeMB: 512
-            deployment:
-              environment: "development"
-              healthCheck:
-                enabled: true
-                endpoint: "/health"
-                interval: 30
+              engineCommunication: false
             stats:
               persistenceEnabled: true
               statsDirectory: "./stats"
@@ -170,38 +120,13 @@ class ConfigTest {
             server:
               webSocket:
                 enabled: true
-                host: "localhost"
                 port: 8080
-              http:
-                enabled: true
-                host: "localhost"
-                port: 8080
-              shutdown:
-                gracefulTimeoutSeconds: 30
             paths:
               engineDir: "./engines"
-              outputDir: "./output"
-              logDir: "./logs"
               resourcesDir: "./resources"
             logging:
               level: "INFO"
-              logToFile: false
-              logToConsole: true
-              gameProgress: true
-              gameProgressInterval: 20
-              engineOutput: false
-              webSocketEvents: false
-            performance:
-              engineStartupTimeoutSeconds: 10
-              engineResponseTimeoutSeconds: 60
-              maxThreadPoolSize: 10
-              recommendedHeapSizeMB: 512
-            deployment:
-              environment: "development"
-              healthCheck:
-                enabled: true
-                endpoint: "/health"
-                interval: 30
+              engineCommunication: false
             stats:
               persistenceEnabled: true
               statsDirectory: "./stats"
@@ -237,38 +162,13 @@ class ConfigTest {
             server:
               webSocket:
                 enabled: true
-                host: "localhost"
                 port: 8080
-              http:
-                enabled: true
-                host: "localhost"
-                port: 8080
-              shutdown:
-                gracefulTimeoutSeconds: 30
             paths:
               engineDir: "./engines"
-              outputDir: "./output"
-              logDir: "./logs"
               resourcesDir: "./resources"
             logging:
               level: "INFO"
-              logToFile: false
-              logToConsole: true
-              gameProgress: true
-              gameProgressInterval: 20
-              engineOutput: false
-              webSocketEvents: false
-            performance:
-              engineStartupTimeoutSeconds: 10
-              engineResponseTimeoutSeconds: 60
-              maxThreadPoolSize: 10
-              recommendedHeapSizeMB: 512
-            deployment:
-              environment: "development"
-              healthCheck:
-                enabled: true
-                endpoint: "/health"
-                interval: 30
+              engineCommunication: false
             stats:
               persistenceEnabled: true
               statsDirectory: "./stats"
