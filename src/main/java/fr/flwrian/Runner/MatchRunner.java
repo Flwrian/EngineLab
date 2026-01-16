@@ -248,9 +248,9 @@ public class MatchRunner {
         int pairsSubmitted = 0;
         int pairsCompleted = 0;
         
-        // Calculate concurrency for pairs (each pair = 2 games, so max concurrent pairs = pool size / 2)
+        // Calculate concurrency for pairs (each pair task runs 2 games sequentially)
         int concurrency = ((java.util.concurrent.ThreadPoolExecutor) pool).getCorePoolSize();
-        int maxConcurrentPairs = Math.max(1, concurrency / 2);
+        int maxConcurrentPairs = concurrency;
         
         // Submit initial batch of pairs (up to max concurrent pairs)
         while (pairsSubmitted < totalPairs && pairsSubmitted < maxConcurrentPairs) {
