@@ -197,6 +197,9 @@ public class GameManager {
 
         Integer lastScore = null; // Centipawn score
         Integer lastDepth = null;
+        Integer lastSelDepth = null;
+        Long lastNodes = null;
+        Long lastNps = null;
         String lastPv = null;
 
         while (true) {
@@ -276,6 +279,48 @@ public class GameManager {
                     }
                 }
                 
+                // Extract seldepth
+                if (line.contains(" seldepth ")) {
+                    try {
+                        int selDepthIndex = line.indexOf(" seldepth ");
+                        String afterSelDepth = line.substring(selDepthIndex + 10);
+                        String[] parts = afterSelDepth.split("\\s+");
+                        if (parts.length > 0) {
+                            lastSelDepth = Integer.parseInt(parts[0]);
+                        }
+                    } catch (Exception e) {
+                        // Ignore parse errors
+                    }
+                }
+                
+                // Extract nodes
+                if (line.contains(" nodes ")) {
+                    try {
+                        int nodesIndex = line.indexOf(" nodes ");
+                        String afterNodes = line.substring(nodesIndex + 7);
+                        String[] parts = afterNodes.split("\\s+");
+                        if (parts.length > 0) {
+                            lastNodes = Long.parseLong(parts[0]);
+                        }
+                    } catch (Exception e) {
+                        // Ignore parse errors
+                    }
+                }
+                
+                // Extract nps (nodes per second)
+                if (line.contains(" nps ")) {
+                    try {
+                        int npsIndex = line.indexOf(" nps ");
+                        String afterNps = line.substring(npsIndex + 5);
+                        String[] parts = afterNps.split("\\s+");
+                        if (parts.length > 0) {
+                            lastNps = Long.parseLong(parts[0]);
+                        }
+                    } catch (Exception e) {
+                        // Ignore parse errors
+                    }
+                }
+                
                 // Extract PV (principal variation) - get first 5 moves
                 if (line.contains(" pv ")) {
                     try {
@@ -298,7 +343,7 @@ public class GameManager {
                 // Broadcast thinking update in real-time
                 if (lastScore != null || lastDepth != null || lastPv != null) {
                     GameWebSocket.broadcast(WSMessage.engineThinking(
-                        gameId, isWhite, lastScore, lastDepth, lastPv
+                        gameId, isWhite, lastScore, lastDepth, lastSelDepth, lastNodes, lastNps, lastPv
                     ));
                 }
             }
@@ -307,7 +352,7 @@ public class GameManager {
                 String[] parts = line.split("\\s+");
                 if (parts.length >= 2) {
                     // Store evaluation in game state for broadcast
-                    gameState.setLastEvaluation(isWhite, lastScore, lastDepth, lastPv);
+                    gameState.setLastEvaluation(isWhite, lastScore, lastDepth, lastSelDepth, lastNodes, lastNps, lastPv);
                     return parts[1];
                 }
             }
@@ -352,6 +397,12 @@ public class GameManager {
                 gameState.getBlackScore(),
                 gameState.getWhiteDepth(),
                 gameState.getBlackDepth(),
+                gameState.getWhiteSelDepth(),
+                gameState.getBlackSelDepth(),
+                gameState.getWhiteNodes(),
+                gameState.getBlackNodes(),
+                gameState.getWhiteNps(),
+                gameState.getBlackNps(),
                 gameState.getWhitePv(),
                 gameState.getBlackPv()
             ));

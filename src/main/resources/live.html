@@ -361,6 +361,14 @@
             color: #dc3545;
         }
 
+        .player-stats {
+            font-size: 0.65em;
+            font-family: 'Courier New', monospace;
+            color: #888;
+            display: none;
+            margin-top: 2px;
+        }
+
         .player-pv {
             font-size: 0.7em;
             font-family: 'Courier New', monospace;
@@ -749,6 +757,7 @@
                     <div class="player-details">
                         <div class="player-name-large" id="black-name">Black</div>
                         <div class="player-eval" id="black-eval">+0.00</div>
+                        <div class="player-stats" id="black-stats"></div>
                         <div class="player-pv" id="black-pv"></div>
                     </div>
                 </div>
@@ -774,6 +783,7 @@
                     <div class="player-details">
                         <div class="player-name-large" id="white-name">White</div>
                         <div class="player-eval" id="white-eval">+0.00</div>
+                        <div class="player-stats" id="white-stats"></div>
                         <div class="player-pv" id="white-pv"></div>
                     </div>
                 </div>
@@ -951,6 +961,12 @@
             if (data.blackScore !== undefined) game.blackScore = data.blackScore;
             if (data.whiteDepth !== undefined) game.whiteDepth = data.whiteDepth;
             if (data.blackDepth !== undefined) game.blackDepth = data.blackDepth;
+            if (data.whiteSelDepth !== undefined) game.whiteSelDepth = data.whiteSelDepth;
+            if (data.blackSelDepth !== undefined) game.blackSelDepth = data.blackSelDepth;
+            if (data.whiteNodes !== undefined) game.whiteNodes = data.whiteNodes;
+            if (data.blackNodes !== undefined) game.blackNodes = data.blackNodes;
+            if (data.whiteNps !== undefined) game.whiteNps = data.whiteNps;
+            if (data.blackNps !== undefined) game.blackNps = data.blackNps;
             if (data.whitePv !== undefined) game.whitePv = data.whitePv;
             if (data.blackPv !== undefined) game.blackPv = data.blackPv;
             
@@ -958,11 +974,11 @@
                 updateBoard();
                 
                 if (game.whiteScore !== undefined) {
-                    updateEngineEval('white', game.whiteScore, game.whiteDepth);
+                    updateEngineEval('white', game.whiteScore, game.whiteDepth, game.whiteSelDepth, game.whiteNodes, game.whiteNps);
                     updatePv('white', game.whitePv);
                 }
                 if (game.blackScore !== undefined) {
-                    updateEngineEval('black', game.blackScore, game.blackDepth);
+                    updateEngineEval('black', game.blackScore, game.blackDepth, game.blackSelDepth, game.blackNodes, game.blackNps);
                     updatePv('black', game.blackPv);
                 }
                 
@@ -984,7 +1000,20 @@
             
             const color = data.isWhite ? 'white' : 'black';
             if (data.score !== undefined) {
-                updateEngineEval(color, data.score, data.depth);
+                // Store the data in the game object
+                if (data.isWhite) {
+                    if (data.depth !== undefined) game.whiteDepth = data.depth;
+                    if (data.selDepth !== undefined) game.whiteSelDepth = data.selDepth;
+                    if (data.nodes !== undefined) game.whiteNodes = data.nodes;
+                    if (data.nps !== undefined) game.whiteNps = data.nps;
+                } else {
+                    if (data.depth !== undefined) game.blackDepth = data.depth;
+                    if (data.selDepth !== undefined) game.blackSelDepth = data.selDepth;
+                    if (data.nodes !== undefined) game.blackNodes = data.nodes;
+                    if (data.nps !== undefined) game.blackNps = data.nps;
+                }
+                
+                updateEngineEval(color, data.score, data.depth, data.selDepth, data.nodes, data.nps);
             }
             
             if (data.pv) {
@@ -1276,7 +1305,7 @@
             blackClockEl.className = 'player-clock-large' + (game.blackTime < 10000 ? ' low-time' : '');
         }
 
-        function updateEngineEval(color, score, depth) {
+        function updateEngineEval(color, score, depth, selDepth, nodes, nps) {
             const evalEl = document.getElementById(`${color}-eval`);
             if (!evalEl) return;
             
@@ -1297,6 +1326,37 @@
             evalEl.textContent = displayScore;
             evalEl.className = 'player-eval' + (score < 0 ? ' negative' : '');
             evalEl.style.display = 'block';
+            
+            // Update additional stats
+            const statsEl = document.getElementById(`${color}-stats`);
+            if (statsEl) {
+                const statsParts = [];
+                
+                if (selDepth !== undefined && selDepth !== null) {
+                    statsParts.push(`sd${selDepth}`);
+                }
+                
+                if (nodes !== undefined && nodes !== null) {
+                    const nodesStr = nodes >= 1000000 ? `${(nodes / 1000000).toFixed(1)}M` :
+                                     nodes >= 1000 ? `${(nodes / 1000).toFixed(1)}k` :
+                                     nodes.toString();
+                    statsParts.push(`nodes: ${nodesStr}`);
+                }
+                
+                if (nps !== undefined && nps !== null) {
+                    const npsStr = nps >= 1000000 ? `${(nps / 1000000).toFixed(1)}M` :
+                                   nps >= 1000 ? `${(nps / 1000).toFixed(1)}k` :
+                                   nps.toString();
+                    statsParts.push(`${npsStr} nps`);
+                }
+                
+                if (statsParts.length > 0) {
+                    statsEl.textContent = statsParts.join(' • ');
+                    statsEl.style.display = 'block';
+                } else {
+                    statsEl.style.display = 'none';
+                }
+            }
         }
 
         function updatePv(color, pv) {

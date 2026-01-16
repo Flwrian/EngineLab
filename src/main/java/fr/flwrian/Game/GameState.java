@@ -20,6 +20,12 @@ public class GameState {
     private Integer blackScore = null;
     private Integer whiteDepth = null;
     private Integer blackDepth = null;
+    private Integer whiteSelDepth = null;  // Selective depth
+    private Integer blackSelDepth = null;
+    private Long whiteNodes = null;  // Nodes searched
+    private Long blackNodes = null;
+    private Long whiteNps = null;  // Nodes per second
+    private Long blackNps = null;
     private String whitePv = null;
     private String blackPv = null;
 
@@ -110,16 +116,26 @@ public class GameState {
      * @param isWhite true if white engine, false if black
      * @param score centipawn score (positive = better for side to move)
      * @param depth search depth
+     * @param selDepth selective depth
+     * @param nodes nodes searched
+     * @param nps nodes per second
      * @param pv principal variation (best move)
      */
-    public void setLastEvaluation(boolean isWhite, Integer score, Integer depth, String pv) {
+    public void setLastEvaluation(boolean isWhite, Integer score, Integer depth, Integer selDepth, 
+                                   Long nodes, Long nps, String pv) {
         if (isWhite) {
             this.whiteScore = score;
             this.whiteDepth = depth;
+            this.whiteSelDepth = selDepth;
+            this.whiteNodes = nodes;
+            this.whiteNps = nps;
             this.whitePv = pv;
         } else {
             this.blackScore = score;
             this.blackDepth = depth;
+            this.blackSelDepth = selDepth;
+            this.blackNodes = nodes;
+            this.blackNps = nps;
             this.blackPv = pv;
         }
     }
@@ -128,6 +144,12 @@ public class GameState {
     public Integer getBlackScore() { return blackScore; }
     public Integer getWhiteDepth() { return whiteDepth; }
     public Integer getBlackDepth() { return blackDepth; }
+    public Integer getWhiteSelDepth() { return whiteSelDepth; }
+    public Integer getBlackSelDepth() { return blackSelDepth; }
+    public Long getWhiteNodes() { return whiteNodes; }
+    public Long getBlackNodes() { return blackNodes; }
+    public Long getWhiteNps() { return whiteNps; }
+    public Long getBlackNps() { return blackNps; }
     public String getWhitePv() { return whitePv; }
     public String getBlackPv() { return blackPv; }
 }

@@ -61,6 +61,42 @@ public class WSMessage {
         
         return msg;
     }
+    
+    public static JsonObject move(int gameId, String move, String fen, long whiteTime, long blackTime, 
+                                   int moveNumber, boolean isWhiteMove, 
+                                   Integer whiteScore, Integer blackScore,
+                                   Integer whiteDepth, Integer blackDepth,
+                                   Integer whiteSelDepth, Integer blackSelDepth,
+                                   Long whiteNodes, Long blackNodes,
+                                   Long whiteNps, Long blackNps,
+                                   String whitePv, String blackPv) {
+        JsonObject msg = new JsonObject();
+        msg.addProperty("type", "move");
+        msg.addProperty("gameId", gameId);
+        msg.addProperty("move", move);
+        msg.addProperty("fen", fen);
+        msg.addProperty("whiteTime", whiteTime);
+        msg.addProperty("blackTime", blackTime);
+        msg.addProperty("moveNumber", moveNumber);
+        msg.addProperty("isWhiteMove", isWhiteMove);
+        msg.addProperty("timestamp", System.currentTimeMillis());
+        
+        // Add evaluation data if available
+        if (whiteScore != null) msg.addProperty("whiteScore", whiteScore);
+        if (blackScore != null) msg.addProperty("blackScore", blackScore);
+        if (whiteDepth != null) msg.addProperty("whiteDepth", whiteDepth);
+        if (blackDepth != null) msg.addProperty("blackDepth", blackDepth);
+        if (whiteSelDepth != null) msg.addProperty("whiteSelDepth", whiteSelDepth);
+        if (blackSelDepth != null) msg.addProperty("blackSelDepth", blackSelDepth);
+        if (whiteNodes != null) msg.addProperty("whiteNodes", whiteNodes);
+        if (blackNodes != null) msg.addProperty("blackNodes", blackNodes);
+        if (whiteNps != null) msg.addProperty("whiteNps", whiteNps);
+        if (blackNps != null) msg.addProperty("blackNps", blackNps);
+        if (whitePv != null) msg.addProperty("whitePv", whitePv);
+        if (blackPv != null) msg.addProperty("blackPv", blackPv);
+        
+        return msg;
+    }
 
     public static JsonObject gameEnd(int gameId, String result, String reason, int totalMoves) {
         JsonObject msg = new JsonObject();
@@ -77,7 +113,7 @@ public class WSMessage {
      * Engine thinking update (real-time analysis)
      */
     public static JsonObject engineThinking(int gameId, boolean isWhite, Integer score, 
-                                             Integer depth, String pv) {
+                                             Integer depth, Integer selDepth, Long nodes, Long nps, String pv) {
         JsonObject msg = new JsonObject();
         msg.addProperty("type", "engine_thinking");
         msg.addProperty("gameId", gameId);
@@ -86,6 +122,9 @@ public class WSMessage {
         
         if (score != null) msg.addProperty("score", score);
         if (depth != null) msg.addProperty("depth", depth);
+        if (selDepth != null) msg.addProperty("selDepth", selDepth);
+        if (nodes != null) msg.addProperty("nodes", nodes);
+        if (nps != null) msg.addProperty("nps", nps);
         if (pv != null) msg.addProperty("pv", pv);
         
         return msg;
