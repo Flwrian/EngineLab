@@ -49,15 +49,15 @@ public class WebSocketServer {
         if (sslEnabled && keyStorePath != null && keyStorePassword != null) {
             try {
                 if (!Files.exists(Paths.get(keyStorePath))) {
-                    System.err.println("⚠️  SSL keystore not found: " + keyStorePath);
+                    System.err.println("WARNING: SSL keystore not found: " + keyStorePath);
                     System.err.println("   Falling back to HTTP only");
                 } else {
                     ServerConnector httpsConnector = createSslConnector(keyStorePath, keyStorePassword, keyStoreType);
                     server.addConnector(httpsConnector);
-                    System.out.println("✅ SSL/TLS enabled on port " + sslPort);
+                    System.out.println("SSL/TLS enabled on port " + sslPort);
                 }
             } catch (Exception e) {
-                System.err.println("⚠️  Failed to configure SSL: " + e.getMessage());
+                System.err.println("WARNING: Failed to configure SSL: " + e.getMessage());
                 System.err.println("   Falling back to HTTP only");
             }
         }
@@ -129,8 +129,8 @@ public class WebSocketServer {
         System.out.println("HTTP status: http://localhost:" + port + "/status");
         
         if (sslEnabled) {
-            System.out.println("✅ Secure WebSocket endpoint: wss://localhost:" + sslPort + "/ws");
-            System.out.println("✅ HTTPS status: https://localhost:" + sslPort + "/status");
+            System.out.println("Secure WebSocket endpoint: wss://localhost:" + sslPort + "/ws");
+            System.out.println("HTTPS status: https://localhost:" + sslPort + "/status");
         }
     }
 

@@ -1,10 +1,17 @@
 package fr.flwrian.Runner;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Random;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 import fr.flwrian.Config.Config;
 import fr.flwrian.Game.MatchPair;
@@ -109,7 +116,7 @@ public class MatchRunner {
     public MatchRunner(List<String> enginePathsList, int concurrency, long baseTimeMs, long incrementMs, int wsPort, Config config) throws Exception {
         this.pool = Executors.newFixedThreadPool(concurrency);
         this.baseTimeControl = new TimeControl(baseTimeMs, incrementMs);
-        this.timeControls = java.util.Arrays.asList(this.baseTimeControl);  // Single time control
+        this.timeControls = Arrays.asList(this.baseTimeControl);  // Single time control
 
         // Start WebSocket server if port specified
         if (wsPort > 0) {
@@ -158,7 +165,7 @@ public class MatchRunner {
      * @param config Full configuration (for SSL settings)
      */
     public MatchRunner(String enginePath, int concurrency, long baseTimeMs, long incrementMs, int wsPort, Config config) throws Exception {
-        this(java.util.Arrays.asList(enginePath), concurrency, baseTimeMs, incrementMs, wsPort, config);
+        this(Arrays.asList(enginePath), concurrency, baseTimeMs, incrementMs, wsPort, config);
     }
     
     /**
@@ -239,17 +246,17 @@ public class MatchRunner {
         long timeoutSeconds = maxTimePerPair / 1000;
 
         // Random number generator for selecting engines
-        java.util.Random random = new java.util.Random();
+        Random random = new Random();
         
         // Track futures with their engine info
-        java.util.Map<java.util.concurrent.Future<PairResult>, String[]> activePairs = new java.util.HashMap<>();
-        java.util.Map<java.util.concurrent.Future<PairResult>, String> pairTimeControls = new java.util.HashMap<>();
+        Map<Future<PairResult>, String[]> activePairs = new HashMap<>();
+        Map<Future<PairResult>, String> pairTimeControls = new HashMap<>();
         
         int pairsSubmitted = 0;
         int pairsCompleted = 0;
         
         // Calculate concurrency for pairs (each pair task runs 2 games sequentially)
-        int concurrency = ((java.util.concurrent.ThreadPoolExecutor) pool).getCorePoolSize();
+        int concurrency = ((ThreadPoolExecutor) pool).getCorePoolSize();
         int maxConcurrentPairs = concurrency;
         
         // Submit initial batch of pairs (up to max concurrent pairs)
@@ -272,7 +279,7 @@ public class MatchRunner {
             TimeControl selectedTC = selectRandomTimeControl(random);
             MatchPair pair = new MatchPair(fen, pairsSubmitted);
             
-            java.util.concurrent.Future<PairResult> future = pool.submit(
+            Future<PairResult> future = pool.submit(
                 new fr.flwrian.Task.OnDemandPairTask(pair, 
                     enginePath1, enginePath2, 
                     selectedTC, 
@@ -284,7 +291,7 @@ public class MatchRunner {
         }
 
         // Track scores per engine name
-        java.util.Map<String, Double> engineScores = new java.util.HashMap<>();
+        Map<String, Double> engineScores = new HashMap<>();
         for (String engineName : engineNames) {
             engineScores.put(engineName, 0.0);
         }
@@ -293,9 +300,9 @@ public class MatchRunner {
         // Wait for pairs to complete and submit new ones
         while (pairsCompleted < totalPairs) {
             // Poll all active futures to find completed ones
-            java.util.concurrent.Future<PairResult> completedFuture = null;
+            Future<PairResult> completedFuture = null;
             
-            for (java.util.concurrent.Future<PairResult> future : activePairs.keySet()) {
+            for (Future<PairResult> future : activePairs.keySet()) {
                 if (future.isDone()) {
                     completedFuture = future;
                     break;
@@ -407,7 +414,7 @@ public class MatchRunner {
                         TimeControl selectedTC = selectRandomTimeControl(random);
                         MatchPair pair = new MatchPair(fen, pairsSubmitted);
                         
-                        java.util.concurrent.Future<PairResult> future = pool.submit(
+                        Future<PairResult> future = pool.submit(
                             new fr.flwrian.Task.OnDemandPairTask(pair, 
                                 enginePath1, enginePath2, 
                                 selectedTC, 
@@ -419,7 +426,7 @@ public class MatchRunner {
                     }
                 }
                 
-            } catch (java.util.concurrent.TimeoutException e) {
+            } catch (TimeoutException e) {
                 System.err.println("Pair timed out after " + timeoutSeconds + " seconds - skipping");
                 
                 // Remove the timed-out future from active pairs
@@ -442,7 +449,7 @@ public class MatchRunner {
                         TimeControl selectedTC = selectRandomTimeControl(random);
                         MatchPair pair = new MatchPair(fen, pairsSubmitted);
                         
-                        java.util.concurrent.Future<PairResult> future = pool.submit(
+                        Future<PairResult> future = pool.submit(
                             new fr.flwrian.Task.OnDemandPairTask(pair, 
                                 enginePath1, enginePath2, 
                                 selectedTC, 
@@ -463,10 +470,10 @@ public class MatchRunner {
         System.out.println("Final Scores:");
         
         // Sort engines by score (descending)
-        java.util.List<java.util.Map.Entry<String, Double>> sortedScores = new java.util.ArrayList<>(engineScores.entrySet());
+        List<Map.Entry<String, Double>> sortedScores = new ArrayList<>(engineScores.entrySet());
         sortedScores.sort((e1, e2) -> Double.compare(e2.getValue(), e1.getValue()));
         
-        for (java.util.Map.Entry<String, Double> entry : sortedScores) {
+        for (Map.Entry<String, Double> entry : sortedScores) {
             String engineName = entry.getKey();
             double score = entry.getValue();
             double percentage = totalGames > 0 ? (score / totalGames) * 100 : 0.0;
@@ -474,7 +481,7 @@ public class MatchRunner {
         }
         
         System.out.println();
-        System.out.println("📈 Statistics:");
+        System.out.println("Statistics:");
         System.out.println("   Total games: " + totalGames);
         System.out.println();
         
@@ -501,7 +508,7 @@ public class MatchRunner {
      * @param random Random number generator
      * @return Array of 2 different indices, or null if not enough engines
      */
-    private int[] selectTwoDifferentEngineIndices(java.util.Random random) {
+    private int[] selectTwoDifferentEngineIndices(Random random) {
         if (enginePaths.size() < 2) {
             return null;
         }
@@ -522,7 +529,7 @@ public class MatchRunner {
      * @param random Random generator
      * @return TimeControl to use for this pair
      */
-    private TimeControl selectRandomTimeControl(java.util.Random random) {
+    private TimeControl selectRandomTimeControl(Random random) {
         if (timeControls.size() == 1) {
             return timeControls.get(0);
         }
@@ -566,7 +573,7 @@ public class MatchRunner {
      * @param random Random generator
      * @return FEN position to use, or "startpos" if no custom positions
      */
-    private String selectStartingPosition(List<String> startFens, int pairIndex, String mode, java.util.Random random) {
+    private String selectStartingPosition(List<String> startFens, int pairIndex, String mode, Random random) {
         if (startFens.isEmpty()) {
             return "startpos";
         }

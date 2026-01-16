@@ -6,6 +6,7 @@ import fr.flwrian.Result.GameResult;
 import fr.flwrian.WebSocket.GameWebSocket;
 import fr.flwrian.WebSocket.WSMessage;
 
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 /**
@@ -117,7 +118,7 @@ public class GameManager {
                     try {
                         currentEngine.send("stop");
                         // Try to read the bestmove that should come after stop
-                        String line = currentEngine.pollLine(500, java.util.concurrent.TimeUnit.MILLISECONDS);
+                        String line = currentEngine.pollLine(500, TimeUnit.MILLISECONDS);
                         if (line != null && line.startsWith("bestmove")) {
                             System.out.println("Engine responded to stop: " + line);
                         }

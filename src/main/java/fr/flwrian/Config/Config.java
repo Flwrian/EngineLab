@@ -7,7 +7,9 @@ import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Complete configuration loader for EngineLab.
@@ -205,7 +207,7 @@ public class Config {
         }
         
         // Check for minimum 2 different engines (engines can't play against themselves)
-        java.util.Set<String> uniqueEngines = new java.util.HashSet<>(tournament.engines);
+        Set<String> uniqueEngines = new HashSet<>(tournament.engines);
         if (uniqueEngines.size() < 2) {
             throw new IOException("At least 2 different engines are required (engines cannot play against themselves). Found: " + uniqueEngines.size());
         }
@@ -408,9 +410,45 @@ public class Config {
         }
         
         if (server != null && server.getWebSocket() != null && server.getWebSocket().isEnabled()) {
-            System.out.println("WebSocket:   localhost:" + server.getWebSocket().getPort());
-            System.out.println("Live View: http://localhost:" + server.getWebSocket().getPort() + "/live");
+            String host = getLocalIPAddress();
+            System.out.println("WebSocket:   " + host + ":" + server.getWebSocket().getPort());
+            System.out.println("Live View: http://" + host + ":" + server.getWebSocket().getPort() + "/live");
         }
         System.out.println("===============================\n");
+    }
+    
+    /**
+     * Get the local IP address of the machine.
+     * Returns localhost if unable to determine the IP.
+     */
+    private static String getLocalIPAddress() {
+        try {
+            // Get all network interfaces
+            java.util.Enumeration<java.net.NetworkInterface> interfaces = 
+                java.net.NetworkInterface.getNetworkInterfaces();
+            
+            while (interfaces.hasMoreElements()) {
+                java.net.NetworkInterface iface = interfaces.nextElement();
+                
+                // Skip loopback and inactive interfaces
+                if (iface.isLoopback() || !iface.isUp()) {
+                    continue;
+                }
+                
+                java.util.Enumeration<java.net.InetAddress> addresses = iface.getInetAddresses();
+                while (addresses.hasMoreElements()) {
+                    java.net.InetAddress addr = addresses.nextElement();
+                    
+                    // Skip IPv6 and loopback addresses
+                    if (addr instanceof java.net.Inet4Address && !addr.isLoopbackAddress()) {
+                        return addr.getHostAddress();
+                    }
+                }
+            }
+        } catch (Exception e) {
+            // Fallback to localhost if we can't determine IP
+        }
+        
+        return "localhost";
     }
 }

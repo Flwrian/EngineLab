@@ -5,13 +5,13 @@ Chess engine tournament system for UCI engines. Run automated tournaments betwee
 ## Features
 
 - **Multi-engine tournaments** - Run round-robin or concurrent matches
-- **Real-time web interface** - Watch games live at `/live`
+- **Real-time web interface** - Watch games live with interactive chessboard
 - **Detailed statistics** - Track performance by engine and time control
 - **Flexible time controls** - Support for base time + increment
 - **Opening books** - Use EPD files for varied starting positions
-- **Docker support** - Develop and run in isolated containers
 - **Concurrent execution** - Run multiple games in parallel
 - **WebSocket streaming** - Real-time updates with no polling
+- **UCI protocol logging** - Debug engine communication
 
 ## Quick Start
 
@@ -41,80 +41,58 @@ The code is mounted as a volume, so you can edit files on your host and changes 
 - **Java**: 17 or higher (JDK)
 - **Maven**: 3.6+ for building
 - **OS**: Linux, macOS, or Windows with WSL
-### Configuration (minimal & tunnel-safe)
 
-EngineLab uses a minimal, explicit config. We intentionally avoid "one-size-fits-all" options and keep the file small and honest.
+## Configuration
 
-Recommended `config.yml` (dev / tunnel usage):
+Minimal `config.yml` example:
 
 ```yaml
 tournament:
   name: "EngineLab Tournament"
-  mode: "pairs"
+  mode: "pairs"                    # "pairs" or "round-robin"
   engines:
     - "Aspira_3"
     - "stockfish"
-  concurrency: 1
-  pairsPerMatch: 100
+  concurrency: 1                   # Number of games to run in parallel
+  pairsPerMatch: 100               # Each pair = 2 games (colors swapped)
   timeControls:
-    - baseTimeMs: 5000
-      incrementMs: 100
+    - baseTimeMs: 5000             # 5 seconds base time
+      incrementMs: 100             # 0.1s increment per move
   openings:
     enabled: true
     file: "8moves.epd"
-    mode: "random"
+    mode: "random"                 # "random" or "sequential"
 
 server:
   webSocket:
     enabled: true
-    host: "127.0.0.1"    # Localhost only - use a tunnel for external access
     port: 8080
-  http:
-    enabled: true
-    host: "127.0.0.1"
-    port: 8080
-  shutdown:
-    gracefulTimeoutSeconds: 30
 
 paths:
   engineDir: "./engines"
-  outputDir: "./output"
   resourcesDir: "./src/main/resources"
 
 logging:
   level: "WARN"                    # DEBUG, INFO, WARN, ERROR
-  engineCommunication: false       # Log all UCI commands (<-) and responses (->)
-
-performance:
-  engineStartupTimeoutSeconds: 10
-  engineResponseTimeoutSeconds: 60
+  engineCommunication: true        # Log all UCI commands and responses
 
 stats:
   persistenceEnabled: true
   statsDirectory: "./stats"
 ```
 
-Notes:
-- We purposely bind to `127.0.0.1` so the app is reachable only locally. Use an external tunnel (Cloudflare Tunnel, Tailscale, ngrok, etc.) to expose it securely.
-- Internal TLS/keystore options have been removed from the default config. If you want HTTPS/WSS in production, terminate TLS at the edge (reverse proxy / tunnel) and keep the app local.
+### Tournament Modes
 
-### Paths
-```yaml
-paths:
-  engineDir: "./engines"
-  outputDir: "./output"
-  logDir: "./logs"
-  resourcesDir: "./src/main/resources"
-```
+**Pairs Mode** (recommended):
+- Each engine pair plays N games with colors swapped
+- Example: `pairsPerMatch: 100` = 200 total games (100 white + 100 black)
+- Good for comparing two engines head-to-head
 
-### Logging
-```yaml
-logging:
-  level: "INFO"                   # DEBUG, INFO, WARN, ERROR
-  engineCommunication: false      # Log all UCI protocol communication
-```
-
-**UCI Communication Logging**
+**Round-Robin Mode**:
+- Every engine plays every other engine
+- With N engines: N*(N-1)/2 unique pairs
+- Good for tournaments with multiple engines
+### UCI Communication Logging
 
 When `engineCommunication: true`, all UCI protocol communication is logged to the console:
 - `[UCI <-]` - Commands sent TO the engine
@@ -131,34 +109,19 @@ Example output:
 [UCI <-] position startpos moves e2e4
 [UCI <-] go wtime 60000 btime 60000 winc 1000 binc 1000
 [UCI ->] info depth 1 seldepth 1 score cp 52 nodes 20 nps 20000 pv e7e5
-[UCI ->] info depth 2 seldepth 2 score cp 49 nodes 40 nps 40000 pv e7e5 g1f3
 [UCI ->] bestmove e7e5
 ```
 
 This is useful for debugging engine issues or understanding how engines think.
 
-### Performance
-```yaml
-performance:
-  engineStartupTimeoutSeconds: 10
-  engineResponseTimeoutSeconds: 60
-  maxThreadPoolSize: 10
-  recommendedHeapSizeMB: 512
-```
-
-### Stats
-```yaml
-stats:
-  persistenceEnabled: true
-  statsDirectory: "./stats"
-```
-
 ## Web Interface
 
-Once started:
-- **Live view**: `http://localhost:8080/live` - Watch games in real-time
-- **Leaderboard**: `http://localhost:8080/leaderboard` - View rankings and stats
-- **WebSocket**: `ws://localhost:8080/ws` - Direct WebSocket connection
+Once started, the server will display the local network IP address:
+- **Live view**: `http://<your-ip>:8080/live` - Watch games in real-time with interactive chessboard
+- **Leaderboard**: `http://<your-ip>:8080/leaderboard` - View rankings and detailed stats
+- **WebSocket**: `ws://<your-ip>:8080/ws` - Direct WebSocket connection
+
+The server automatically detects your local IP, making it easy to access from other devices on your network.
 
 ## Adding Engines
 
@@ -168,7 +131,8 @@ Once started:
 4. Add to `config.yml`:
 ```yaml
 engines:
-  - "engine"
+  - "stockfish"
+  - "another_engine"
 ```
 
 ### Supported Engines
@@ -176,7 +140,6 @@ Any UCI-compatible chess engine:
 - Stockfish
 - Leela Chess Zero (lc0)
 - Komodo
-- Rybka
 - Custom engines
 
 ## Building
@@ -185,10 +148,8 @@ Any UCI-compatible chess engine:
 # Clean build
 mvn clean package
 
-gmvn package
-
-# Run directly
-mvn exec:java
+# Run tests
+mvn test
 
 # Create executable JAR
 mvn package
@@ -218,11 +179,10 @@ enginelab/
 │   │       ├── chessground.js   # Board library
 │   │       └── pieces/          # SVG chess pieces
 │   └── test/java/               # Unit tests
-├── engines/                     # UCI engine binaries (not in git)
-├── stats/                       # Persistent statistics (not in git)
-├── logs/                        # Application logs (not in git)
+├── engines/                     # UCI engine binaries (gitignored)
+├── stats/                       # Persistent statistics (gitignored)
 ├── config.yml                   # Main configuration
-├── docker-compose.dev.yml       # Docker dev environment
+├── docker-compose.yml           # Docker environment
 ├── docker.sh                    # Docker launcher
 ├── run.sh                       # Local launcher
 └── pom.xml                      # Maven configuration
@@ -235,56 +195,35 @@ enginelab/
 - **Jetty 11** - WebSocket server and HTTP endpoints
 - **Gson** - JSON serialization
 - **SnakeYAML** - YAML parsing
-- **SLF4J + Logback** - Structured logging
+- **chesslib** - Chess position validation
 - **Chessground.js** - Board visualization
 - **Vanilla JS** - Frontend (no framework bloat)
 
-## Development
-
-### Running Tests
-```bash
-mvn test
-```
-
-### Code Style
-- Follow standard Java conventions
-- Use meaningful variable names
-- Comment complex algorithms
-- Keep methods focused and small
-
-### Hot Reload (with Docker)
-```bash
-./docker.sh
-# Edit files on host
-# Inside container:
-mvn compile exec:java
-```
 
 ## Troubleshooting
 
 ### Engine Not Found
 - Check path in `config.yml`
 - Ensure binary is executable: `chmod +x engines/yourengine`
-- Verify engine responds to `uci` command
+- Verify engine responds to `uci` command: `./engines/yourengine` then type `uci`
 
 ### Port Already in Use
-- Change port in `config.yml` under `server.websocket.port`
+- Change port in `config.yml` under `server.webSocket.port`
 - Kill process using port: `lsof -ti:8080 | xargs kill`
 
-### Out of Memory
-- Increase JVM heap: `JAVA_OPTS=-Xmx4g ./run.sh`
-- Reduce concurrency in `config.yml`
+### Games Timeout
+- Increase base time in `timeControls`
+- Check engine is responding with `engineCommunication: true`
+- Verify engine binary is correct architecture (x64, ARM, etc.)
+
+### WebSocket Connection Issues
+- Check firewall settings
+- Verify port is accessible: `netstat -an | grep 8080`
+- Use the IP address shown at startup, not localhost
 
 ## License
 
 MIT License - See LICENSE file for details
-
-## Contributing
-
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Submit a pull request
 
 ## Author
 

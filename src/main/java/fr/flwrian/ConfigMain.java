@@ -3,6 +3,8 @@ package fr.flwrian;
 import fr.flwrian.Config.Config;
 import fr.flwrian.Runner.MatchRunner;
 import fr.flwrian.Stats.StatsManager;
+
+import java.io.File;
 import java.util.List;
 
 /**
@@ -26,7 +28,7 @@ public class ConfigMain {
             // Enable UCI communication logging if configured
             if (config.getLogging() != null && config.getLogging().isEngineCommunication()) {
                 fr.flwrian.Engine.Engine.setLogCommunication(true);
-                System.out.println("🔍 UCI communication logging enabled");
+                System.out.println("UCI communication logging enabled");
                 System.out.println();
             }
             
@@ -35,7 +37,7 @@ public class ConfigMain {
             System.out.println("Validating " + enginePaths.size() + " engine(s):");
             for (String path : enginePaths) {
                 System.out.println("   - " + path);
-                java.io.File engineFile = new java.io.File(path);
+                File engineFile = new File(path);
                 System.out.println("     ├─ Exists: " + engineFile.exists());
                 System.out.println("     ├─ Size: " + engineFile.length() + " bytes");
                 System.out.println("     └─ Executable: " + engineFile.canExecute());
