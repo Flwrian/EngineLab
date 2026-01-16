@@ -34,7 +34,7 @@ paths:
   resourcesDir: "./src/main/resources"
 
 logging:
-  level: "INFO"
+  level: "WARN"
   logToFile: false
   logToConsole: true
   gameProgress: false

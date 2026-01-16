@@ -42,25 +42,25 @@ public class OnDemandPairTask implements Callable<PairResult> {
         Engine engine2 = null;
         
         try {
-            System.out.println("[" + threadName + "] === " + pair + " starting ===");
-            System.out.println("[" + threadName + "] Matchup: " + engine1Name + " vs " + engine2Name);
+            // System.out.println("[" + threadName + "] === " + pair + " starting ===");
+            // System.out.println("[" + threadName + "] Matchup: " + engine1Name + " vs " + engine2Name);
             
             // Create engines on-demand
-            System.out.println("[" + threadName + "] Creating engine instances...");
+            // System.out.println("[" + threadName + "] Creating engine instances...");
             engine1 = new Engine(engine1Path);
             engine2 = new Engine(engine2Path);
-            System.out.println("[" + threadName + "] Engines created successfully");
+            // System.out.println("[" + threadName + "] Engines created successfully");
             
             // Display FEN (truncate if too long for readability)
-            String fen = pair.getStartFen();
-            if (fen != null && !fen.isEmpty()) {
-                String displayFen = fen.length() > 70 ? fen.substring(0, 67) + "..." : fen;
-                System.out.println("[" + threadName + "] 📋 FEN: " + displayFen);
-            }
+            // String fen = pair.getStartFen();
+            // if (fen != null && !fen.isEmpty()) {
+            //     String displayFen = fen.length() > 70 ? fen.substring(0, 67) + "..." : fen;
+            //     System.out.println("[" + threadName + "] 📋 FEN: " + displayFen);
+            // }
             
             // Game 1: engine1 = White, engine2 = Black
-            System.out.println("[" + threadName + "] Starting game 1 of pair " + pair.getPairId());
-            System.out.println("[" + threadName + "] ⚪ White: " + engine1Name + " | ⚫ Black: " + engine2Name);
+            // System.out.println("[" + threadName + "] Starting game 1 of pair " + pair.getPairId());
+            // System.out.println("[" + threadName + "] ⚪ White: " + engine1Name + " | ⚫ Black: " + engine2Name);
             GameManager game1 = new GameManager(
                 pair.getGame1Id(), 
                 engine1, 
@@ -72,10 +72,10 @@ public class OnDemandPairTask implements Callable<PairResult> {
             );
             GameResult result1 = game1.run();
             results.add(result1);
-            System.out.println("[" + threadName + "] Game 1 of pair " + pair.getPairId() + " completed: " + result1.getResult());
+            // System.out.println("[" + threadName + "] Game 1 of pair " + pair.getPairId() + " completed: " + result1.getResult());
             
             // Reset engines between games (clear queue + ucinewgame)
-            System.out.println("[" + threadName + "] Resetting engines between games...");
+            // System.out.println("[" + threadName + "] Resetting engines between games...");
             engine1.reset();
             engine2.reset();
             
@@ -83,8 +83,8 @@ public class OnDemandPairTask implements Callable<PairResult> {
             Thread.sleep(100);
             
             // Game 2: engine2 = White, engine1 = Black (colors swapped)
-            System.out.println("[" + threadName + "] Starting game 2 of pair " + pair.getPairId());
-            System.out.println("[" + threadName + "] ⚪ White: " + engine2Name + " | ⚫ Black: " + engine1Name);
+            // System.out.println("[" + threadName + "] Starting game 2 of pair " + pair.getPairId());
+            // System.out.println("[" + threadName + "] ⚪ White: " + engine2Name + " | ⚫ Black: " + engine1Name);
             GameManager game2 = new GameManager(
                 pair.getGame2Id(), 
                 engine2, 
@@ -96,9 +96,9 @@ public class OnDemandPairTask implements Callable<PairResult> {
             );
             GameResult result2 = game2.run();
             results.add(result2);
-            System.out.println("[" + threadName + "] Game 2 of pair " + pair.getPairId() + " completed: " + result2.getResult());
+            // System.out.println("[" + threadName + "] Game 2 of pair " + pair.getPairId() + " completed: " + result2.getResult());
             
-            System.out.println("[" + threadName + "] === " + pair + " completed ===");
+            // System.out.println("[" + threadName + "] === " + pair + " completed ===");
             
             return new PairResult(pair.getPairId(), results, engine1Name, engine2Name);
             
@@ -124,7 +124,7 @@ public class OnDemandPairTask implements Callable<PairResult> {
             return new PairResult(pair.getPairId(), results, engine1Name, engine2Name);
         } finally {
             // Always close engines after pair completes
-            System.out.println("[" + threadName + "] Closing engines for pair " + pair.getPairId());
+            // System.out.println("[" + threadName + "] Closing engines for pair " + pair.getPairId());
             if (engine1 != null) {
                 try {
                     engine1.close();
@@ -139,7 +139,7 @@ public class OnDemandPairTask implements Callable<PairResult> {
                     System.err.println("[" + threadName + "] Error closing engine2: " + e.getMessage());
                 }
             }
-            System.out.println("[" + threadName + "] Engines closed for pair " + pair.getPairId());
+            // System.out.println("[" + threadName + "] Engines closed for pair " + pair.getPairId());
         }
     }
 }

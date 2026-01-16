@@ -20,13 +20,13 @@ public class Engine {
         
         // Detailed engine file verification
         File engineFile = new File(path);
-        System.out.println("[Engine] Initializing engine: " + path);
-        System.out.println("  ├─ Absolute path: " + engineFile.getAbsolutePath());
-        System.out.println("  ├─ Exists: " + engineFile.exists());
-        System.out.println("  ├─ Is file: " + engineFile.isFile());
-        System.out.println("  ├─ Can read: " + engineFile.canRead());
-        System.out.println("  ├─ Can execute: " + engineFile.canExecute());
-        System.out.println("  └─ Size: " + engineFile.length() + " bytes");
+        // System.out.println("[Engine] Initializing engine: " + path);
+        // System.out.println("  ├─ Absolute path: " + engineFile.getAbsolutePath());
+        // System.out.println("  ├─ Exists: " + engineFile.exists());
+        // System.out.println("  ├─ Is file: " + engineFile.isFile());
+        // System.out.println("  ├─ Can read: " + engineFile.canRead());
+        // System.out.println("  ├─ Can execute: " + engineFile.canExecute());
+        // System.out.println("  └─ Size: " + engineFile.length() + " bytes");
         
         if (!engineFile.exists()) {
             throw new Exception("Engine not found: " + path);
@@ -38,14 +38,14 @@ public class Engine {
             engineFile.setExecutable(true);
         }
         
-        System.out.println("[Engine] Starting process...");
+        // System.out.println("[Engine] Starting process...");
         process = new ProcessBuilder(path).start();
         
         if (!process.isAlive()) {
             throw new Exception("Engine process failed to start properly");
         }
         
-        System.out.println("[Engine] Process started (PID: " + process.pid() + ")");
+        // System.out.println("[Engine] Process started (PID: " + process.pid() + ")");
         in = new BufferedWriter(new OutputStreamWriter(process.getOutputStream()));
 
         // Thread to capture engine standard output
@@ -54,7 +54,7 @@ public class Engine {
                     new InputStreamReader(process.getInputStream()))) {
                 String line;
                 while ((line = br.readLine()) != null) {
-                    System.out.println("[Engine] " + enginePath + " -> " + line);
+                    // System.out.println("[Engine] " + enginePath + " -> " + line);
                     outQueue.put(line);
                 }
             } catch (Exception e) {
@@ -76,21 +76,21 @@ public class Engine {
             }
         }).start();
 
-        System.out.println("[Engine] Sending 'uci' command...");
+        // System.out.println("[Engine] Sending 'uci' command...");
         send("uci");
-        System.out.println("[Engine] Waiting for 'uciok'...");
+        // System.out.println("[Engine] Waiting for 'uciok'...");
         waitFor("uciok");
-        System.out.println("[Engine] 'uciok' received");
+        // System.out.println("[Engine] 'uciok' received");
         
-        System.out.println("[Engine] Sending 'isready' command...");
+        // System.out.println("[Engine] Sending 'isready' command...");
         send("isready");
-        System.out.println("[Engine] Waiting for 'readyok'...");
+        // System.out.println("[Engine] Waiting for 'readyok'...");
         waitFor("readyok");
-        System.out.println("[Engine] 'readyok' received - Engine ready!");
+        // System.out.println("[Engine] 'readyok' received - Engine ready!");
     }
 
     public void send(String cmd) throws Exception {
-        System.out.println("[Engine] " + enginePath + " <- " + cmd);
+        // System.out.println("[Engine] " + enginePath + " <- " + cmd);
         in.write(cmd + "\n");
         in.flush();
     }
@@ -145,7 +145,7 @@ public class Engine {
      */
     public void close() {
         try {
-            System.out.println("[Engine] Closing engine: " + enginePath);
+            // System.out.println("[Engine] Closing engine: " + enginePath);
             send("quit");
             
             // Give the engine 2 seconds to close gracefully
@@ -156,7 +156,7 @@ public class Engine {
                 process.destroyForcibly();
             }
             
-            System.out.println("[Engine] Engine closed: " + enginePath);
+            // System.out.println("[Engine] Engine closed: " + enginePath);
         } catch (Exception e) {
             System.err.println("[Engine] Error closing engine: " + e.getMessage());
             process.destroyForcibly();
