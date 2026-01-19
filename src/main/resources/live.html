@@ -796,7 +796,9 @@
 
     <script src="/static/chessground.js"></script>
     <script>
+        
         const games = new Map();
+        const MAX_ARCHIVED_GAMES = 50;
         let board = null;
         let currentGameId = null;
         let ws = null;
@@ -832,7 +834,7 @@
 
         // Initialize Chessground
         if (typeof Chessground !== 'undefined' && typeof Chessground.Chessground === 'function') {
-            console.log('✅ Chessground loaded successfully');
+
             const boardElement = document.getElementById('board');
             board = Chessground.Chessground(boardElement, {
                 coordinates: true,
@@ -853,11 +855,11 @@
         function connectWebSocket() {
     const protocol = window.location.protocol === "https:" ? "wss" : "ws";
     const wsUrl = `${protocol}://${window.location.host}/ws`;
-    console.log(`🔌 Connecting to ${wsUrl}...`);
+
     ws = new WebSocket(wsUrl);
 
     ws.onopen = () => {
-        console.log('✅ WebSocket connected');
+
         reconnectAttempts = 0;
         const statusEl = document.getElementById('status');
         statusEl.innerHTML = '<span class="status-dot"></span>Connected';
@@ -865,7 +867,7 @@
     };
 
     ws.onclose = () => {
-        console.log('❌ WebSocket disconnected');
+
         const statusEl = document.getElementById('status');
         statusEl.innerHTML = '<span class="status-dot"></span>Disconnected';
         statusEl.className = 'status';
@@ -873,7 +875,7 @@
         if (reconnectAttempts < 10) {
             const delay = Math.min(1000 * Math.pow(2, reconnectAttempts), 30000);
             reconnectAttempts++;
-            console.log(`🔄 Reconnecting in ${delay}ms (attempt ${reconnectAttempts})...`);
+
             setTimeout(connectWebSocket, delay);
         }
     };
@@ -885,7 +887,7 @@
     ws.onmessage = (event) => {
         try {
             const message = JSON.parse(event.data);
-            console.log('📨 Message received:', message.type);
+
             handleMessage(message);
         } catch (e) {
             console.error('Failed to parse WebSocket message:', e);
@@ -897,7 +899,7 @@
         function handleMessage(message) {
             switch (message.type) {
                 case 'connected':
-                    console.log('Server welcome:', message.message);
+
                     break;
                 case 'game_start':
                     handleGameStart(message);
@@ -916,7 +918,7 @@
 
         function handleGameStart(data) {
             const gameId = data.gameId;
-            console.log(`🎮 Game ${gameId} started`);
+
             
             let moves = [];
             if (data.moves) {
@@ -1025,23 +1027,22 @@
         function handleGameEnd(data) {
             const game = games.get(data.gameId);
             if (!game) return;
-            
+
             game.status = 'finished';
             game.result = data.result;
             game.reason = data.reason;
-            
-            if (currentGameId === data.gameId) {
-                if (clockInterval) {
-                    clearInterval(clockInterval);
-                    clockInterval = null;
-                }
+
+            if (currentGameId === data.gameId && clockInterval) {
+                clearInterval(clockInterval);
+                clockInterval = null;
             }
-            
+
+            cleanupArchivedGames();   // 👈 limite RAM
+
             updateGameList();
-            
+
             if (currentGameId === data.gameId) {
                 updateBoard();
-                
                 setTimeout(() => {
                     const activeGames = getActiveGameIds();
                     if (activeGames.length > 0) {
@@ -1050,6 +1051,7 @@
                 }, 2000);
             }
         }
+
 
         function getActiveGameIds() {
             const activeGames = [];
@@ -1370,6 +1372,32 @@
                 pvEl.style.display = 'none';
             }
         }
+
+        function cleanupArchivedGames() {
+            const archived = [];
+
+            for (const [id, game] of games) {
+                if (game.status !== 'running') {
+                    archived.push([id, game]);
+                }
+            }
+
+            // du plus ancien au plus récent
+            archived.sort((a, b) => a[0] - b[0]);
+
+            const excess = archived.length - MAX_ARCHIVED_GAMES;
+            if (excess <= 0) return;
+
+            for (let i = 0; i < excess; i++) {
+                const [oldId] = archived[i];
+                games.delete(oldId);
+
+                if (currentGameId === oldId) {
+                    currentGameId = null;
+                }
+            }
+        }
+
 
         function drawPvArrows(pv, fen) {
             const svgEl = document.getElementById('board-arrows');
