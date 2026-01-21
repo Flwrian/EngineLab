@@ -174,6 +174,8 @@ enginelab/
 └── pom.xml                      # Maven configuration
 ```
 
+```
+
 ## Tech Stack
 
 - **Java 17** - Core language
