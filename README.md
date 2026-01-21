@@ -142,37 +142,7 @@ Any UCI-compatible chess engine:
 
 ```
 
-## Project Structure
 
-```
-enginelab/
-├── src/
-│   ├── main/
-│   │   ├── java/fr/flwrian/
-│   │   │   ├── Chess/           # Chess move validation
-│   │   │   ├── Config/          # Configuration management
-│   │   │   ├── Engine/          # UCI engine communication
-│   │   │   ├── Game/            # Game state and management
-│   │   │   ├── Result/          # Game/pair results
-│   │   │   ├── Runner/          # Tournament execution
-│   │   │   ├── Stats/           # Statistics tracking
-│   │   │   ├── Task/            # Concurrent game tasks
-│   │   │   ├── Util/            # Utilities (FEN loader, etc.)
-│   │   │   └── WebSocket/       # WebSocket server
-│   │   └── resources/
-│   │       ├── live.html        # Live game viewer
-│   │       ├── leaderboard.html # Statistics page
-│   │       ├── chessground.js   # Board library
-│   │       └── pieces/          # SVG chess pieces
-│   └── test/java/               # Unit tests
-├── engines/                     # UCI engine binaries (gitignored)
-├── stats/                       # Persistent statistics (gitignored)
-├── config.yml                   # Main configuration
-├── docker-compose.yml           # Docker environment
-├── docker.sh                    # Docker launcher
-├── run.sh                       # Local launcher
-└── pom.xml                      # Maven configuration
-```
 
 ```
 
