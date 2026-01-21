@@ -140,12 +140,6 @@ Any UCI-compatible chess engine:
 - Komodo
 - Custom engines
 
-```
-
-
-
-```
-
 ## Tech Stack
 
 - **Java 17** - Core language
