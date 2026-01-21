@@ -1,6 +1,10 @@
 # EngineLab
-
 Chess engine tournament system for UCI engines. Run automated tournaments between chess engines with real-time web interface and detailed statistics.
+
+<img width="1899" height="1021" alt="image" src="https://github.com/user-attachments/assets/e0853904-c0f6-470a-b8e7-c8617307ffe4" />
+
+<img width="1908" height="1021" alt="image" src="https://github.com/user-attachments/assets/d63ea1cf-b9fd-4bae-b621-e0869960cfc8" />
+
 
 ## Features
 
